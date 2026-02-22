@@ -44,7 +44,7 @@ PERSONAS = [
     'software_engineer',
     ]
 
-# Percentages must sum to 100
+# パーセンテージの合計は100でなければならない
 PERSONA_PERCENTS = [
     7,   # conservatism
     6,   # hardwork
@@ -63,7 +63,7 @@ PERSONA_PERCENTS = [
 
 def distribute_fixed_personas(num_agents: int) -> list[str]:
     counts = [round(p/100 * num_agents) for p in PERSONA_PERCENTS]
-    # Adjust for rounding errors
+    # 丸め誤差の調整
     while sum(counts) < num_agents:
         counts[counts.index(max(counts))] += 1
     while sum(counts) > num_agents:
@@ -76,8 +76,8 @@ def distribute_fixed_personas(num_agents: int) -> list[str]:
 
 def distribute_personas(num_agents: int, arg_llm: str, arg_port: int, arg_service: str) -> dict[str, str]:
     """
-    Create personas using LLM based on synthetic data statistics.
-    Each persona is generated from the sampled occupation, sex, and age statistics.
+    合成データ統計に基づいてLLMを使用してペルソナを作成する。
+    各ペルソナはサンプリングされた職業、性別、年齢統計から生成される。
     """
     csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'occupation_detailed_summary.csv')
     synthetic_data = generate_synthetic_data(csv_path, num_agents)
@@ -85,14 +85,14 @@ def distribute_personas(num_agents: int, arg_llm: str, arg_port: int, arg_servic
     if arg_llm == 'None':
         return distribute_fixed_personas(num_agents)
     
-    # Create the appropriate LLM model based on the type
+    # タイプに基づいて適切なLLMモデルを作成
     if 'gpt' in arg_llm.lower():
         llm = OpenAIModel(model_name=arg_llm)
     elif 'claude' in arg_llm.lower() or 'anthropic' in arg_llm.lower():
         llm = OpenRouterModel(model_name=arg_llm)
     elif 'gemini' in arg_llm.lower():
         llm = GeminiModel(model_name=arg_llm)
-    elif '/' in arg_llm:  # Assume it's a model path for OpenRouter
+    elif '/' in arg_llm:  # OpenRouterのモデルパスと仮定
         llm = OpenRouterModel(model_name=arg_llm)
     elif 'llama' in arg_llm.lower() or 'gemma' in arg_llm.lower():
         if arg_service == 'ollama':
@@ -100,27 +100,27 @@ def distribute_personas(num_agents: int, arg_llm: str, arg_port: int, arg_servic
         else:
             llm = VLLMModel(model_name=arg_llm, base_url=f"http://localhost:{arg_port}")
     else:
-        raise ValueError(f"Invalid LLM type: {arg_llm}")
+        raise ValueError(f"無効なLLMタイプ: {arg_llm}")
     
     personas = {}
     
     for i, (occupation, sex, age) in enumerate(synthetic_data):
-        # Create a unique key for this persona
+        # このペルソナのユニークキーを作成
         persona_key = f"{occupation.lower().replace(' ', '_').replace(',', '').replace('.', '')}_{i}"
         
-        # Create persona using LLM based on the sampled statistics
+        # サンプリングされた統計に基づいてLLMを使用してペルソナを作成
         persona_description = create_persona_with_llm(llm, occupation, sex, age)
         
         personas[persona_key] = persona_description
     
-    print(f"Created {len(personas)} personas from synthetic data using LLM")
+    print(f"合成データからLLMを使用して{len(personas)}個のペルソナを作成しました")
     print(personas)
     return personas
 
 
 def create_persona_with_llm(llm, occupation: str, sex: str, age: int) -> str:
     """
-    Use LLM to create a persona description based on occupation, sex, and age statistics.
+    職業、性別、年齢統計に基づいてLLMを使用してペルソナの説明を作成する。
     """
     system_prompt = "You are an expert in creating realistic economic personas for simulations. Create detailed, realistic personas based on demographic and occupational data."
     
@@ -145,27 +145,27 @@ Example format: "You are a [age]-year-old [gender] working as [occupation]. [Eco
     try:
         persona_description, _ = llm.send_msg(system_prompt=system_prompt, user_prompt=user_prompt)
         
-        # Clean up the response
+        # レスポンスのクリーンアップ
         persona_description = persona_description.strip()
         
-        # Remove any markdown formatting or extra quotes
+        # マークダウンフォーマットや余分な引用符を除去
         if persona_description.startswith('"') and persona_description.endswith('"'):
             persona_description = persona_description[1:-1]
         
         return persona_description
         
     except Exception as e:
-        print(f"Error generating persona with LLM: {e}")
-        # Fallback to a basic description
+        print(f"LLMによるペルソナ生成エラー: {e}")
+        # 基本的な説明にフォールバック
         return f"You are a {age}-year-old {sex.lower()} working in {occupation.lower()}. You have typical economic concerns for someone in your position and make financial decisions based on your experience and circumstances."
 
 
 def create_persona_from_stats(occupation: str, sex: str, age: int) -> str:
     """
-    Create a persona description based on occupation, sex, and age statistics.
-    This is kept as a fallback method.
+    職業、性別、年齢統計に基づいてペルソナの説明を作成する。
+    フォールバックメソッドとして保持。
     """
-    # Define some economic characteristics based on occupation categories
+    # 職業カテゴリに基づく経済的特性を定義
     occupation_traits = {
         # Professional/Technical occupations
         'Computer and mathematical occupations': {
@@ -242,7 +242,7 @@ def create_persona_from_stats(occupation: str, sex: str, age: int) -> str:
         }
     }
     
-    # Get traits for this occupation, with defaults if not found
+    # この職業の特性を取得 (見つからない場合はデフォルト値)
     traits = occupation_traits.get(occupation, {
         'income_level': 'moderate',
         'risk_tolerance': 'moderate',
@@ -250,7 +250,7 @@ def create_persona_from_stats(occupation: str, sex: str, age: int) -> str:
         'work_situation': 'works in their chosen field'
     })
     
-    # Age-based adjustments
+    # 年齢に基づく調整
     if age < 25:
         life_stage = "early career"
         financial_focus = "building savings and paying off student loans"
@@ -270,13 +270,13 @@ def create_persona_from_stats(occupation: str, sex: str, age: int) -> str:
         life_stage = "retirement or late career"
         financial_focus = "managing fixed income and healthcare expenses"
     
-    # Gender-based considerations (based on general economic trends)
+    # 性別に基づく考慮事項 (一般的な経済トレンドに基づく)
     if sex.lower() == 'female':
         gender_considerations = "may face wage gaps and career interruptions"
     else:
         gender_considerations = "benefits from traditional career advantages"
     
-    # Create the persona description
+    # ペルソナの説明を作成
     persona_description = f"You are a {age}-year-old {sex.lower()} working in {occupation.lower()}. " \
                           f"You are in your {life_stage} and your main financial focus is {financial_focus}. " \
                           f"You have {traits['income_level']} income and {traits['risk_tolerance']} risk tolerance. " \
@@ -294,44 +294,44 @@ class Worker(LLMAgent):
         super().__init__(llm, port, name, prompt_algo, history_len, timeout, args=args)
         self.logger = logging.getLogger('main')
         self.max_timesteps = max_timesteps
-        self.z = 0  # pre-tax income
-        self.l = 0  # number of labor hours
+        self.z = 0  # 税引前所得
+        self.l = 0  # 労働時間数
         if skill == -1:
-            self.v = np.random.uniform(1.24, 159.1)  # skill level
+            self.v = np.random.uniform(1.24, 159.1)  # スキルレベル
         else:
             self.v = skill
         self.role = role
         self.utility_type = utility_type
 
-        # voting
+        # 投票
         self.leader = f"worker_{0}"
         assert num_agents != -1
         self.num_agents = num_agents
         self.change = 20
         self.vote = int(self.name.split("_")[-1])
-        self.platform = None # corresponds to not running
+        self.platform = None # 立候補しないことに対応
         self.swf = 0.
         
         self.scenario = scenario
 
-        # scenarios
+        # シナリオ
         if self.utility_type == 'altruistic' or self.utility_type == 'adversarial':
             self.act = self.act_utility_labor
         elif self.utility_type == 'egotistical':
             self.act = self.act_labor
         else:
-            raise ValueError('Invalid scenario.')
+            raise ValueError('無効なシナリオ。')
 
-        self.tax_paid = 0    # tax
+        self.tax_paid = 0    # 税金
         self.two_timescale = two_timescale
 
-        # llm predicted variables
+        # LLM予測変数
         self.z_pred = 0
         self.u_pred = 0
 
-        self.c = 0.0005   # labor disutility coefficient
-        self.r = 1.0      # role coefficient
-        self.delta = 3.5 # labor disutility exponent
+        self.c = 0.0005   # 労働不効用係数
+        self.r = 1.0      # 役割係数
+        self.delta = 3.5 # 労働不効用指数
         self.utility = 0
         self.adjusted_utility = 0
         # self.ETA = 0.1
@@ -342,7 +342,7 @@ class Worker(LLMAgent):
         elif self.utility_type == 'adversarial':
             utility_name = 'negative social welfare'
         else:
-            raise ValueError('Invalid utility type')
+            raise ValueError('無効な効用タイプ')
         if self.role == 'default':
             self.system_prompt = 'You are ' + self.name + ', a citizen of Princetonia. Your skill level is ' + str(self.v) + f' with an expected income of {self.v*40} at 40 hours of labor each week.'\
                     ' Each year you will have the option to choose the number of hours of labor to perform each week. \
@@ -383,12 +383,12 @@ class Worker(LLMAgent):
         return self.l
 
     def compute_isoelastic_utility(self, post_tax_income: float, tax_rebate: float) -> float:
-        z_tilde = post_tax_income + tax_rebate    # post-tax income
+        z_tilde = post_tax_income + tax_rebate    # 税引後所得
         self.z_tilde = z_tilde
         return z_tilde - self.c * np.power(self.l, self.delta)
 
     def update_utility(self, timestep: float, post_tax_income: float, tax_rebate: float, swf: float) -> float:
-        z_tilde = post_tax_income + tax_rebate    # post-tax income
+        z_tilde = post_tax_income + tax_rebate    # 税引後所得
         if self.utility_type == 'egotistical':
             self.utility = self.compute_isoelastic_utility(post_tax_income, tax_rebate)
         elif self.utility_type == 'altruistic':
@@ -396,13 +396,13 @@ class Worker(LLMAgent):
         elif self.utility_type == 'adversarial':
             self.utility = -swf
         else:
-            raise ValueError('Invalid utility type')
+            raise ValueError('無効な効用タイプ')
         self.labor_history.append(self.l)
 
         self.rebate = tax_rebate
         self.tax_paid = self.z - post_tax_income
         # avg_utility = np.average(self.utility_history[:-self.history_len])
-        # Update episode history
+        # エピソード履歴を更新
         if self.scenario == 'democratic':
             self.message_history[timestep]['historical'] += f'Current leader: {self.leader}\n'
         self.message_history[timestep]['historical'] += f'pre-tax income: z = s * l = {self.z}\n'
@@ -417,7 +417,7 @@ class Worker(LLMAgent):
             elif self.utility_type == 'adversarial':
                 utility_def = '-u_1/z_1 - ... - u_N/z_N'
             else:
-                raise ValueError('Invalid utility type')
+                raise ValueError('無効な効用タイプ')
             self.message_history[timestep]['historical'] += f'utility: u = {utility_def} = {self.utility}\n'
             self.utility_history.append(self.utility)
             self.message_history[timestep]['metric'] = self.utility
@@ -438,8 +438,8 @@ class Worker(LLMAgent):
             self.message_history[timestep]['historical'] += f'adjusted utility: u = r * u~ = {self.adjusted_utility}\n'
         # self.message_history[timestep]['historical'] += f'average utility: u = z~ - c * l^d = {avg_utility}\n'
 
-        # reason about other agents effect on utility:
-        # TODO: which utility to use for reasoning?
+        # 他のエージェントが効用に与える影響を推論:
+        # TODO: 推論にどの効用を使用するか?
         if timestep > 0 and self.l != self.labor_prev:
             delta_l = self.l - self.labor_prev
             delta_l_msg = 'Increasing' if delta_l > 0 else 'Decreasing'
@@ -478,23 +478,23 @@ class Worker(LLMAgent):
         output = tuple(output)
         for x in output:
             if x < 0 or np.isnan(x) or np.isinf(x):
-                raise ValueError('out of bounds', output)
+                raise ValueError('範囲外', output)
         return output
     
     def parse_role_answer(self, items: list[str]) -> float:
         if not isinstance(items[0], str):
-            raise ValueError('invalid answer', items)
+            raise ValueError('無効な回答', items)
         answer = items[0].lower()
         if 'yes' in answer:
             return 1.0
         elif 'no' in answer:
             return 0.5
         else:
-            raise ValueError('invalid answer', answer)
+            raise ValueError('無効な回答', answer)
 
     def parse_platform(self, items: list[str]) -> float:
         if not isinstance(items[0], list):
-            raise ValueError('invalid platform', list)
+            raise ValueError('無効なプラットフォーム', list)
         answer = items[0]
         self.platform = answer
         self.logger.info(f"[WORKER] {self.name} platform={self.platform}") 
@@ -502,7 +502,7 @@ class Worker(LLMAgent):
         
     def parse_vote(self, items: list[str]) -> float:
         if not isinstance(items[0], str):
-            raise ValueError('invalid leader vote', items)
+            raise ValueError('無効なリーダー投票', items)
         answer = int(items[0])
         self.vote = answer
         return answer
@@ -516,8 +516,8 @@ class Worker(LLMAgent):
         #     return None
         #print("delta before parse: ", tax_rates)
         output_delta = []
-        if len(tax_rates) != self.num_brackets:  
-            raise ValueError('too many tax values', tax_rates)
+        if len(tax_rates) != self.num_brackets:
+            raise ValueError('税率値が多すぎます', tax_rates)
         for i, rate in enumerate(tax_rates):
             if isinstance(rate, str):
                 rate = rate.replace('$','').replace(',','').replace('%', '')
@@ -541,10 +541,10 @@ class Worker(LLMAgent):
         self.l = self.act_llm(timestep, ['LABOR'], self.parse_labor)[0]
         # self.l, self.z_pred, self.u_pred = self.act_llm(timestep, ['LABOR', 'z', 'u'], self.parse_labor)
         self.add_message(timestep, Message.ACTION)
-        self.add_message_history_timestep(timestep+1) # add for next timestep
+        self.add_message_history_timestep(timestep+1) # 次のタイムステップ用に追加
         self.z = self.l * self.v
         return self.z
-    
+
     def act_pre_vote(self, timestep: int):
         worker_state = self.get_historical_message(timestep, include_user_prompt=False)
         bracket_prompt, format_prompt = get_bracket_prompt(self.bracket_setting)
@@ -596,17 +596,17 @@ class Worker(LLMAgent):
             return ([0]*self.num_brackets,)
     
     def act_utility_labor(self, timestep: int, tax_rates: list[float], planner_state: str):
-        # for adversarial and altruistic actions
+        # 敵対的・利他的アクション用
         self.add_message(timestep, Message.UPDATE, tax=tax_rates)
         worker_state = self.get_historical_message(timestep, include_user_prompt=True)
         msg = planner_state + worker_state
         self.l = self.prompt_io(msg, timestep, ['LABOR'], self.parse_labor)[0]
         self.add_message(timestep, Message.ACTION)
-        self.add_message_history_timestep(timestep+1) # add for next timestep
+        self.add_message_history_timestep(timestep+1) # 次のタイムステップ用に追加
         self.z = self.l * self.v
         return self.z
-        
-    
+
+
     def update_leader(self, timestep: int, leader: int, candidates: list = None):
         self.leader = f"worker_{leader}"
         self.message_history[timestep]['leader'] = f"Leader: {self.leader}."
@@ -662,12 +662,12 @@ class Worker(LLMAgent):
         if self.utility_type == 'egotistical':
             logger[f"posttax_income_{self.name}"] = self.z_tilde
         logger[f"utility_{self.name}"] = self.utility
-        logger[f"role_{self.name}"] = self.role # strings do not log correctly in wandb
+        logger[f"role_{self.name}"] = self.role # 文字列はwandbで正しくログされない
         logger[f"satisfaction_{self.name}"] = self.r
         logger[f"adjusted_utility_{self.name}"] = self.adjusted_utility
         if self.scenario == 'democratic':
             logger[f"vote_{self.name}"] = (self.name, self.vote)
-        # LLM info debug
+        # LLM情報デバッグ
         # logger[f"llm_income_{self.name}"] = self.z_pred
         # logger[f"llm_utility_{self.name}"] = self.u_pred
         # logger[f"llm_income_diff_{self.name}"] = np.abs(self.z_pred-self.z)
@@ -686,24 +686,24 @@ class FixedWorker(LLMAgent):
     def __init__(self, name: str, history_len: int=10, timeout: int=10, skill: int=-1, labor: int=-1, args=None) -> None:
         super().__init__('None', 0, name=name, history_len=history_len, timeout=timeout, args=args)
         self.logger = logging.getLogger('main')
-        self.z = 0  # pre-tax income
+        self.z = 0  # 税引前所得
         if labor == -1:
-            self.l = np.random.randint(0, 100)  # number of labor hours
+            self.l = np.random.randint(0, 100)  # 労働時間数
         else:
             self.l = labor
         if skill == -1:
-            self.v = np.random.uniform(1.24, 159.1)  # skill level
+            self.v = np.random.uniform(1.24, 159.1)  # スキルレベル
         else:
             self.v = skill
 
-        self.tax_paid = 0    # tax
+        self.tax_paid = 0    # 税金
 
-        # llm predicted variables
+        # LLM予測変数
         self.z_pred = 0
         self.u_pred = 0
 
-        self.c = 0.0005   # labor disutility coefficient
-        self.delta = 3.5 # labor disutility exponent
+        self.c = 0.0005   # 労働不効用係数
+        self.delta = 3.5 # 労働不効用指数
         self.utility = 0
         self.utility_history = []
         self.labor_history = []
@@ -723,7 +723,7 @@ class FixedWorker(LLMAgent):
         return self.z
 
     def compute_isoelastic_utility(self, post_tax_income: float, tax_rebate: float) -> float:
-        z_tilde = post_tax_income + tax_rebate    # post-tax income
+        z_tilde = post_tax_income + tax_rebate    # 税引後所得
         self.z_tilde = z_tilde
         return z_tilde - self.c * np.power(self.l, self.delta)
 

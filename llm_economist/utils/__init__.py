@@ -1,5 +1,5 @@
 """
-Utility functions for the LLM Economist framework.
+LLM Economistフレームワークのユーティリティ関数。
 """
 
 from .common import *

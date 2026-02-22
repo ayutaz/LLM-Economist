@@ -1,5 +1,5 @@
 """
-LLM Economist: A framework for economic simulations using Large Language Models.
+LLM Economist: 大規模言語モデルを用いた経済シミュレーションフレームワーク。
 """
 
 __version__ = "1.0.0"

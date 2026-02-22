@@ -28,19 +28,19 @@ class LLMAgent:
         self.logger = logging.getLogger('main')
         self.name = name
         
-        # Initialize the appropriate model based on llm_type
+        # llm_typeに基づいて適切なモデルを初期化
         self.llm = self._create_llm_model(llm_type, port, args)
         
         self.history_len = history_len
-        self.timeout = timeout  # number of times to retry message before failing
-        self.system_prompt = None   # must be overwritten
+        self.timeout = timeout  # 失敗する前のメッセージリトライ回数
+        self.system_prompt = None   # サブクラスで上書きが必要
         self.init_message_history()
 
         self.prompt_algo = prompt_algo
-        self.K = K  # depth of prompt trees
+        self.K = K  # プロンプトツリーの深さ
 
     def _create_llm_model(self, llm_type: str, port: int, args):
-        """Create the appropriate LLM model based on the type."""
+        """タイプに基づいて適切なLLMモデルを作成する。"""
         if llm_type == 'None':
             return None
         elif 'gpt' in llm_type.lower():
@@ -49,7 +49,7 @@ class LLMAgent:
             return OpenRouterModel(model_name=llm_type)
         elif 'gemini' in llm_type.lower():
             return GeminiModel(model_name=llm_type)
-        elif '/' in llm_type:  # Assume it's a model path for OpenRouter
+        elif '/' in llm_type:  # OpenRouterのモデルパスと仮定
             return OpenRouterModel(model_name=llm_type)
         elif 'llama' in llm_type.lower() or 'gemma' in llm_type.lower():
             if args.service == 'ollama':
@@ -57,14 +57,14 @@ class LLMAgent:
             else:
                 return VLLMModel(model_name=llm_type, base_url=f"http://localhost:{port}")
         else:
-            raise ValueError(f"Invalid LLM type: {llm_type}")
+            raise ValueError(f"無効なLLMタイプ: {llm_type}")
 
     def act(self) -> str:
         raise NotImplementedError
-    
+
     def init_message_history(self) -> None:
         # [{timestep: i, 'system_prompt': '', 'user_prompt': 'Historical timesteps: ', 'action': '' }, ...]
-        # init first timestep
+        # 最初のタイムステップを初期化
         self.message_history = [{
             'timestep': 0,
             'system_prompt': '',
@@ -91,10 +91,10 @@ class LLMAgent:
         return
     
     def get_historical_message(self, timestep: int, retry: bool=False, include_user_prompt: bool=True) -> str:
-        unique_metrics = set()  # Set to store unique 'metric' values
-        sorted_message_history = []  # List to store sorted unique entries
+        unique_metrics = set()  # ユニークな'metric'値を格納するセット
+        sorted_message_history = []  # ソートされたユニークエントリを格納するリスト
 
-        # Sort the dictionary by 'metric' key in descending order
+        # 'metric'キーで降順にソート
         for item in sorted(self.message_history, key=lambda x: x['metric'], reverse=True):
             if str(item['metric']) + str(item['action']) not in unique_metrics:
                 unique_metrics.add(str(item['metric']) + str(item['action']))
@@ -115,7 +115,7 @@ class LLMAgent:
         return output
     
     def act_llm(self, timestep: int, keys: list[str], parse_func, depth: int=0, retry: bool=False) -> list[float]:
-        # concat user prompts from prev timesteps to get historical information for current timestep
+        # 前のタイムステップのユーザープロンプトを連結して現在のタイムステップの履歴情報を取得
         msg = self.get_historical_message(timestep, retry)
         if self.prompt_algo == 'io':
             return self.prompt_io(msg, timestep, keys, parse_func)
@@ -140,7 +140,7 @@ class LLMAgent:
             llm_output, _ = self.llm.send_msg(self.system_prompt, msg + '\n{"', temperature=temperature, json_format=True)
         try:
             self.logger.info(f"LLM OUTPUT RECURSE {depth}\t{llm_output.strip()}")
-            # parse for json braces {}
+            # JSONの中括弧 {} をパース
             data = json.loads(llm_output)
             parsed_keys = []
             for key in keys:
@@ -150,14 +150,14 @@ class LLMAgent:
             if depth <= self.timeout:
                 return self.call_llm(msg, timestep, keys, parse_func, depth=depth+1, retry=True)
             else:
-                raise ValueError(f"Max recursion depth={depth} reached. Error parsing JSON: " + str(e))
+                raise ValueError(f"最大再帰深度={depth}に到達しました。JSONパースエラー: " + str(e))
         return output
     
-    # prompting
+    # プロンプティング
     def prompt_io(self, msg: str, timestep: int, keys: list[str], parse_func) -> list[float]:
         return self.call_llm(msg, timestep, keys, parse_func)
     
-    # Self-Consistency prompting
+    # Self-Consistencyプロンプティング
     def prompt_sc(self, msg: str, timestep: int, keys: list[str], parse_func) -> list[float]:
         llm_outputs = []
         for i in range(self.K):
@@ -172,10 +172,10 @@ class LLMAgent:
         output = most_common(llm_outputs)
         return output
     
-    # Chain of thought prompting
+    # Chain of Thoughtプロンプティング
     def prompt_cot(self, msg: str, timestep: int, keys: list[str], parse_func) -> list[float]:
         cot_prompt = " Let's think step by step. Your thought should no more than 4 sentences."
-        # always add json thought "thought":"<step-by-step-thinking>" response in user_prompt in agent
+        # エージェントのuser_promptにJSON形式の思考 "thought":"<step-by-step-thinking>" レスポンスを常に追加
         return self.call_llm(msg + cot_prompt, timestep, keys, parse_func, cot=True)
     
     def add_message(self, timestep: int, m_type: Message, **args) -> None:
@@ -185,8 +185,8 @@ class LLMAgent:
         # self.logger.info("[parse_tax]", tax_rates)
         tax_rates = items[0]
         output_tax_rates = []
-        if len(tax_rates) != self.num_brackets:  # fixed to 2 tax divisions
-            raise ValueError('too many tax values', tax_rates)
+        if len(tax_rates) != self.num_brackets:  # 税率区分数の固定チェック
+            raise ValueError('税率値が多すぎます', tax_rates)
         for i, rate in enumerate(tax_rates):
             if isinstance(rate, str):
                 rate = rate.replace('$','').replace(',','').replace('%', '')
@@ -208,22 +208,22 @@ class LLMAgent:
 class TestAgent(LLMAgent):
     def __init__(self, llm: str, port: int, args):
         super().__init__(llm, port, name='TestAgent', args=args)
-        max_retries = 5  # Maximum attempts (including initial call)
-        initial_delay = 1  # Starting delay in seconds
-        max_delay = 60  # Maximum delay between retries
+        max_retries = 5  # 最大試行回数 (初回を含む)
+        initial_delay = 1  # 初期遅延 (秒)
+        max_delay = 60  # リトライ間の最大遅延
         current_delay = initial_delay
         
         for attempt in range(max_retries):
             try:
                 self.llm.send_msg('', 'This is a test. Output \"test\" in response.')
-                print(f"Successfully connected to f{args.service} LLM service")
-                return  # Exit on success
+                print(f"{args.service} LLMサービスへの接続に成功しました")
+                return  # 成功時に終了
             except Exception as e:
-                if attempt == max_retries - 1:  # Final attempt failed
+                if attempt == max_retries - 1:  # 最後の試行が失敗
                     raise RuntimeError(
-                        f"Failed to connect after {max_retries} attempts. Last error: {str(e)}"
+                        f"{max_retries}回の試行後に接続に失敗しました。最後のエラー: {str(e)}"
                     ) from e
-                
-                print(f"Attempt {attempt + 1} failed. Retrying in {current_delay}s...")
+
+                print(f"試行 {attempt + 1} 失敗。{current_delay}秒後にリトライ...")
                 sleep(current_delay)
-                current_delay = min(current_delay * 2, max_delay)  # Exponential backoff with cap
+                current_delay = min(current_delay * 2, max_delay)  # 上限付き指数バックオフ

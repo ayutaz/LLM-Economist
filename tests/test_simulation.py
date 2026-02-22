@@ -1,5 +1,5 @@
 """
-Tests for the main simulation functionality.
+メインシミュレーション機能のテスト。
 """
 
 import pytest
@@ -8,10 +8,10 @@ from llm_economist.main import run_simulation, generate_experiment_name, create_
 
 
 class TestExperimentName:
-    """Test experiment name generation."""
-    
+    """実験名生成のテスト。"""
+
     def test_rational_experiment_name(self):
-        """Test name generation for rational experiment."""
+        """合理的実験の名前生成テスト。"""
         class Args:
             scenario = "rational"
             num_agents = 5
@@ -36,7 +36,7 @@ class TestExperimentName:
             assert part in name
     
     def test_bounded_experiment_name(self):
-        """Test name generation for bounded experiment."""
+        """限定合理性実験の名前生成テスト。"""
         class Args:
             scenario = "bounded"
             num_agents = 10
@@ -66,10 +66,10 @@ class TestExperimentName:
 
 
 class TestArgumentParser:
-    """Test command line argument parsing."""
-    
+    """コマンドライン引数解析のテスト。"""
+
     def test_default_arguments(self):
-        """Test default argument values."""
+        """デフォルト引数値のテスト。"""
         parser = create_argument_parser()
         args = parser.parse_args([])
         
@@ -84,7 +84,7 @@ class TestArgumentParser:
         assert args.two_timescale == 25
     
     def test_custom_arguments(self):
-        """Test parsing custom arguments."""
+        """カスタム引数の解析テスト。"""
         parser = create_argument_parser()
         args = parser.parse_args([
             "--scenario", "bounded",
@@ -106,18 +106,18 @@ class TestArgumentParser:
 
 
 class TestSimulation:
-    """Test main simulation functionality."""
+    """メインシミュレーション機能のテスト。"""
     
     @patch('llm_economist.main.TestAgent')
     @patch('llm_economist.main.Worker')
     @patch('llm_economist.main.TaxPlanner')
     @patch('llm_economist.main.wandb')
     def test_rational_simulation_setup(self, mock_wandb, mock_planner, mock_worker, mock_test_agent):
-        """Test that rational simulation sets up correctly."""
-        # Mock the test agent to succeed
+        """合理的シミュレーションが正しくセットアップされることを確認するテスト。"""
+        # テストエージェントが成功するようにモック
         mock_test_agent.return_value = Mock()
         
-        # Mock worker and planner creation
+        # ワーカーとプランナーの生成をモック
         mock_worker_instance = Mock()
         mock_worker_instance.labor = 50
         mock_worker_instance.utility = 100
@@ -127,7 +127,7 @@ class TestSimulation:
         mock_planner_instance.act.return_value = [0.2, 0.3]
         mock_planner.return_value = mock_planner_instance
         
-        # Create test args
+        # テスト用引数を作成
         class Args:
             scenario = "rational"
             num_agents = 2
@@ -153,24 +153,24 @@ class TestSimulation:
         
         args = Args()
         
-        # Mock the rGB2 function to return skills
+        # rGB2関数がスキルを返すようにモック
         with patch('llm_economist.main.rGB2', return_value=[50.0, 60.0]):
-            # This should not raise an exception
+            # 例外が発生しないはず
             try:
                 run_simulation(args)
             except SystemExit:
-                # The simulation might exit early due to mocking, that's ok
+                # モックのためシミュレーションが早期終了する可能性があるが問題なし
                 pass
         
-        # Verify that components were created
+        # コンポーネントが生成されたことを検証
         mock_test_agent.assert_called_once()
-        assert mock_worker.call_count == 2  # Two agents
+        assert mock_worker.call_count == 2  # エージェント2体
         mock_planner.assert_called_once()
     
     @patch('llm_economist.main.TestAgent')
     def test_llm_connection_failure(self, mock_test_agent):
-        """Test simulation handles LLM connection failure."""
-        # Mock test agent to fail
+        """LLM接続失敗時のシミュレーション処理テスト。"""
+        # テストエージェントが失敗するようにモック
         mock_test_agent.side_effect = Exception("Connection failed")
         
         class Args:
@@ -182,7 +182,7 @@ class TestSimulation:
         
         args = Args()
         
-        # Should exit with error code 1
+        # エラーコード1で終了するはず
         with pytest.raises(SystemExit) as exc_info:
             run_simulation(args)
         
@@ -192,7 +192,7 @@ class TestSimulation:
     @patch('llm_economist.main.FixedWorker')
     @patch('llm_economist.main.FixedTaxPlanner')
     def test_fixed_agents_simulation(self, mock_fixed_planner, mock_fixed_worker, mock_test_agent):
-        """Test simulation with fixed (non-LLM) agents."""
+        """固定（非LLM）エージェントでのシミュレーションテスト。"""
         mock_test_agent.return_value = Mock()
         
         mock_worker_instance = Mock()
@@ -238,7 +238,7 @@ class TestSimulation:
         mock_fixed_planner.assert_called_once()
     
     def test_invalid_scenario(self):
-        """Test that invalid scenarios are handled."""
+        """無効なシナリオが処理されることを確認するテスト。"""
         class Args:
             scenario = "invalid_scenario"
             agent_mix = "us_income"
@@ -246,18 +246,18 @@ class TestSimulation:
         
         args = Args()
         
-        # This should raise a ValueError or similar when trying to process personas
-        # We can't easily test the full simulation due to mocking complexity,
-        # but this tests the scenario validation logic
+        # ペルソナ処理時にValueErrorなどが発生するはず
+        # モックの複雑さから完全なシミュレーションテストは困難だが、
+        # シナリオ検証ロジックのテストは可能
         assert args.scenario not in ["rational", "bounded", "democratic"]
 
 
 class TestUtilityFunctions:
-    """Test utility functions."""
+    """ユーティリティ関数のテスト。"""
     
     @patch('llm_economist.main.logging.basicConfig')
     def test_setup_logging(self, mock_logging):
-        """Test logging setup."""
+        """ロギング設定のテスト。"""
         from llm_economist.main import setup_logging
         import logging
         
@@ -265,23 +265,23 @@ class TestUtilityFunctions:
         mock_logging.assert_called_once()
     
     def test_invalid_agent_mix(self):
-        """Test handling of invalid agent mix."""
+        """無効なエージェント構成の処理テスト。"""
         class Args:
             agent_mix = "invalid_mix"
             num_agents = 5
         
         args = Args()
         
-        # This should eventually raise a ValueError in the actual simulation
+        # 実際のシミュレーションではValueErrorが発生するはず
         with pytest.raises(ValueError, match="Unknown agent mix"):
-            # Simulate the agent mix validation logic from run_simulation
+            # run_simulationのエージェント構成検証ロジックをシミュレート
             if args.agent_mix not in ['uniform', 'us_income']:
                 raise ValueError(f'Unknown agent mix: {args.agent_mix}')
 
 
-# Integration test
+# 結合テスト
 class TestFullWorkflow:
-    """Test the complete workflow."""
+    """完全なワークフローのテスト。"""
     
     @patch('llm_economist.main.TestAgent')
     @patch('llm_economist.main.Worker')
@@ -291,8 +291,8 @@ class TestFullWorkflow:
     @patch('llm_economist.main.distribute_agents')
     def test_bounded_scenario_workflow(self, mock_dist_agents, mock_dist_personas, 
                                      mock_rgb2, mock_planner, mock_worker, mock_test_agent):
-        """Test the complete bounded scenario workflow."""
-        # Setup mocks
+        """限定合理性シナリオの完全なワークフローテスト。"""
+        # モックのセットアップ
         mock_test_agent.return_value = Mock()
         mock_rgb2.return_value = [50.0, 60.0]
         mock_dist_personas.return_value = {"persona1": "data1", "persona2": "data2"}
@@ -338,7 +338,7 @@ class TestFullWorkflow:
         except SystemExit:
             pass
         
-        # Verify the workflow was followed
+        # ワークフローが正しく実行されたことを検証
         mock_test_agent.assert_called_once()
         mock_rgb2.assert_called_once_with(2)
         mock_dist_personas.assert_called_once()

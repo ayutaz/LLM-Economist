@@ -37,14 +37,14 @@ class TaxPlanner(LLMAgent):
         # self.tax_swf = np.zeros((11,11)) + self.best_swf
         # self.tax_count = np.zeros((11,11))
         # self.history = [[[] for i in range(11)] for j in range(11)]
-        # Get number of tax brackets from current rates
+        # 現在の税率から税ブラケット数を取得
         num_brackets = len(self.tax_rates)
 
-        # Initialize N-dimensional arrays for tracking SWF and counts
+        # SWFとカウント追跡用のN次元配列を初期化
         self.tax_swf = np.zeros((11,) * num_brackets) + self.best_swf
         self.tax_count = np.zeros((11,) * num_brackets)
 
-        # Use dictionary for flexible history tracking
+        # 柔軟な履歴追跡のために辞書を使用
         self.history = defaultdict(list)
 
         self.total_calls = 0
@@ -58,7 +58,7 @@ class TaxPlanner(LLMAgent):
         #     self.exploration_count.append(c)
         
     def act(self, timestep: int, workers_stats: list[tuple[float, float]] = []) -> list[float]:
-        # add default values for timestep 0
+        # タイムステップ0のデフォルト値を追加
         self.total_calls += 1
         self.add_obs_msg(timestep, workers_stats)
         if timestep == 0:
@@ -77,7 +77,7 @@ class TaxPlanner(LLMAgent):
         return self.tax_rates
     
     def act_log_only(self, tax_delta: list[int], timestep: int) -> list[float]:
-        # add default values for timestep 0
+        # タイムステップ0のデフォルト値を追加
         if timestep == 0:
             self.tax_rates = get_default_rates(self.bracket_setting)
         else:        
@@ -90,13 +90,13 @@ class TaxPlanner(LLMAgent):
         return self.tax_rates
     
     def add_obs_msg(self, timestep, workers_stats: list[tuple[float, float]]) -> None:
-        self.add_message_history_timestep(timestep+1)   # action is for next timestep
+        self.add_message_history_timestep(timestep+1)   # アクションは次のタイムステップ用
         if timestep == 0:
             self.add_message(timestep, Message.SYSTEM)
         else:
-            # (pre-tax income, utility)
-            z = [workers_stats[i][0] for i in range(len(workers_stats))]  # pre-tax income
-            u = [workers_stats[i][1] for i in range(len(workers_stats))]  # utilty
+            # (税引前所得, 効用)
+            z = [workers_stats[i][0] for i in range(len(workers_stats))]  # 税引前所得
+            u = [workers_stats[i][1] for i in range(len(workers_stats))]  # 効用
             self.add_message(timestep, Message.UPDATE, u=u, z=z)
         return
     
@@ -151,17 +151,17 @@ class TaxPlanner(LLMAgent):
         return z_tilde, total_tax
     
     def get_random(self, mu: int=0, n: int=1):
-        # Mean and standard deviation
-        std = 7  # standard deviation
+        # 平均と標準偏差
+        std = 7  # 標準偏差
 
-        # Generate random integers
-        random_integers = np.random.normal(mu, std, n)  # Generating n random integers
+        # ランダム整数を生成
+        random_integers = np.random.normal(mu, std, n)  # n個のランダム整数を生成
 
-        # Ensure the generated integers are within [0, 100]
+        # 生成された整数が[0, 100]の範囲内であることを確認
         random_integers = np.clip(random_integers, -20, 20)
         random_integers = np.round(random_integers / 10) * 10
 
-        # Convert the floats to integers
+        # float値を整数に変換
         random_integers = random_integers.astype(int)
         return random_integers[0]
     
@@ -188,10 +188,10 @@ class TaxPlanner(LLMAgent):
                 
                 return '\n'.join(histogram)
 
-            # For pretax income (z), use tax brackets
+            # 税引前所得 (z) には税ブラケットを使用
             z_histogram = create_tax_bracket_histogram(z)
 
-            # For utility (u), keep the original function with equal bins
+            # 効用 (u) には等間隔ビンの元の関数を使用
             def create_text_histogram(data, bins=10, max_bar_length=20):
                 hist, bin_edges = np.histogram(data, bins=bins)
                 max_count = max(hist)
@@ -201,7 +201,7 @@ class TaxPlanner(LLMAgent):
                     histogram.append(f"{edge:.2f}-{edge + (bin_edges[1] - bin_edges[0]):.2f}: {'#' * bar_length} ({count})")
                 return '\n'.join(histogram)
 
-            # Create histograms for u and z
+            # uとzのヒストグラムを作成
             u_histogram = create_text_histogram(u)
             
             self.logger.info(f'utility list {u}')
@@ -212,25 +212,25 @@ class TaxPlanner(LLMAgent):
             self.message_history[timestep]['historical'] += f"Pre-tax income (z) distribution:\n{z_histogram}\n\n"
             self.message_history[timestep]['historical'] += f"Utility (u) distribution:\n{u_histogram}\n\n"
 
-            # Calculate and add summary statistics
+            # 要約統計量を計算して追加
             self.message_history[timestep]['historical'] += f"Summary statistics:\n"
             self.message_history[timestep]['historical'] += f"z: mean={np.mean(z):.2f}, median={np.median(z):.2f}, std={np.std(z):.2f}\n"
             self.message_history[timestep]['historical'] += f"u: mean={np.mean(u):.2f}, median={np.median(u):.2f}, std={np.std(u):.2f}\n\n"
                 
-            # Generalized index calculation for N rates
+            # N個の税率に対する汎用インデックス計算
             indices = tuple(int(rate // 10) for rate in self.tax_rates)
 
-            # Update tax_swf and tax_count
+            # tax_swfとtax_countを更新
             if timestep % self.tax_year == 0 and timestep >= self.warmup:
-                # Update history using tuple key
+                # タプルキーを使用して履歴を更新
                 self.history[indices].append(self.swf)
                 
-                # Calculate running average for SWF
+                # SWFの移動平均を計算
                 prev_total = self.tax_swf[indices] * self.tax_count[indices]
                 self.tax_swf[indices] = (prev_total + self.swf) / (self.tax_count[indices] + 1)
                 self.tax_count[indices] += 1
             
-            # Find best SWF using unraveled index
+            # unravelインデックスを使用して最良SWFを検索
             self.best_swf = np.max(self.tax_swf)
             index_best = np.unravel_index(np.argmax(self.tax_swf), self.tax_swf.shape)
             self.best_tax = [10 * x for x in index_best]
@@ -302,7 +302,7 @@ class TaxPlanner(LLMAgent):
         self.add_reflect_msg(timestep)
         logger["swf"] = self.swf
 
-        # update history after full timestep
+        # フルタイムステップ後に履歴を更新
         self.tax_history.append(self.tax_rates.copy())
         self.swf_history.append(self.swf)
 
@@ -325,37 +325,37 @@ class FixedTaxPlanner(TaxPlanner):
         if tax_type == 'US_FED':
             self.tax_rates = [10, 12, 22, 24, 32, 35, 37]
         elif tax_type == 'SAEZ':
-            # Use provided elasticities if they match bracket count
+            # ブラケット数と一致する場合は提供された弾力性を使用
             num_brackets = get_num_brackets(self.bracket_setting)
             if len(args.elasticity) == num_brackets:
                 elasticities = args.elasticity
             else:
-                elasticities = [3.0] * get_num_brackets(self.bracket_setting) # flat Saez value in AI Economist paper
+                elasticities = [3.0] * get_num_brackets(self.bracket_setting) # AI Economist論文のフラットSaez値
             self.tax_rates = saez_optimal_tax_rates(skills, brackets, elasticities)
         elif tax_type == 'SAEZ_FLAT':
-            # Use provided elasticities if they match bracket count
+            # ブラケット数と一致する場合は提供された弾力性を使用
             num_brackets = get_num_brackets(self.bracket_setting)
             if len(args.elasticity) == num_brackets:
                 elasticities = args.elasticity
             else:
-                elasticities = [0.4]  # flat Saez value from Saez 2002: 0.4
+                elasticities = [0.4]  # Saez 2002のフラットSaez値: 0.4
             self.tax_rates = saez_optimal_tax_rates(skills, brackets, elasticities)
         elif tax_type == 'SAEZ_THREE':
-            # Use provided elasticities if they match bracket count
+            # ブラケット数と一致する場合は提供された弾力性を使用
             num_brackets = get_num_brackets(self.bracket_setting)
             if len(args.elasticity) == num_brackets:
                 elasticities = args.elasticity
             else:
-                elasticities = [0.18, 0.11, 0.57]  # from Saez 2002 paper [low, mid, high earners]
+                elasticities = [0.18, 0.11, 0.57]  # Saez 2002論文より [低, 中, 高所得者]
             self.tax_rates = saez_optimal_tax_rates(skills, brackets, elasticities)
         elif tax_type == 'UNIFORM':
             self.tax_rates = [50, 50]
         else:
-            raise ValueError(f'Invalid tax type: {tax_type}')
+            raise ValueError(f'無効な税タイプ: {tax_type}')
     
     def act(self, timestep: int, workers_stats: list[tuple[float, float]] = []) -> list[float]:
-        z = [workers_stats[i][0] for i in range(len(workers_stats))]  # pre-tax income
-        u = [workers_stats[i][1] for i in range(len(workers_stats))]  # utilty
+        z = [workers_stats[i][0] for i in range(len(workers_stats))]  # 税引前所得
+        u = [workers_stats[i][1] for i in range(len(workers_stats))]  # 効用
         self.swf = self.get_social_welfare(z, u)
         return self.tax_rates
     

@@ -1,5 +1,5 @@
 """
-Agent implementations for the LLM Economist framework.
+LLM Economistフレームワークのエージェント実装。
 """
 
 from .worker import Worker, FixedWorker

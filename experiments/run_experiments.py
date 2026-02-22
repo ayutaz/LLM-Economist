@@ -1,5 +1,5 @@
 """
-Script to run the main experiments from the LLM Economist paper.
+LLM Economist 論文の主要実験を実行するスクリプト。
 """
 
 import os
@@ -10,22 +10,22 @@ from typing import List, Dict, Any
 
 
 def run_command(cmd: List[str], description: str = ""):
-    """Run a command and handle errors."""
-    print(f"Running: {description}")
-    print(f"Command: {' '.join(cmd)}")
-    
+    """コマンドを実行し、エラーを処理する。"""
+    print(f"実行中: {description}")
+    print(f"コマンド: {' '.join(cmd)}")
+
     try:
         result = subprocess.run(cmd, check=True, capture_output=True, text=True)
-        print(f"Success: {description}")
+        print(f"成功: {description}")
         return result
     except subprocess.CalledProcessError as e:
-        print(f"Error running {description}: {e}")
-        print(f"stderr: {e.stderr}")
+        print(f"{description} の実行中にエラー: {e}")
+        print(f"標準エラー出力: {e.stderr}")
         return None
 
 
 def rational_agents_experiment(args):
-    """Run rational agents experiment."""
+    """合理的エージェント実験を実行する。"""
     base_cmd = [
         sys.executable, "-m", "llm_economist.main",
         "--scenario", "rational",
@@ -52,7 +52,7 @@ def rational_agents_experiment(args):
 
 
 def bounded_rational_experiment(args):
-    """Run bounded rational agents experiment."""
+    """限定合理性エージェント実験を実行する。"""
     base_cmd = [
         sys.executable, "-m", "llm_economist.main",
         "--scenario", "bounded",
@@ -82,7 +82,7 @@ def bounded_rational_experiment(args):
 
 
 def democratic_voting_experiment(args):
-    """Run democratic voting experiment."""
+    """民主的投票実験を実行する。"""
     base_cmd = [
         sys.executable, "-m", "llm_economist.main",
         "--scenario", "democratic",
@@ -109,7 +109,7 @@ def democratic_voting_experiment(args):
 
 
 def llm_comparison_experiment(args):
-    """Run LLM comparison experiment."""
+    """LLM比較実験を実行する。"""
     models = ["gpt-4o-mini", "llama3:8b", "meta-llama/llama-3.1-8b-instruct"]
     
     for model in models:
@@ -139,7 +139,7 @@ def llm_comparison_experiment(args):
 
 
 def scalability_experiment(args):
-    """Run scalability experiment with different numbers of agents."""
+    """異なるエージェント数でスケーラビリティ実験を実行する。"""
     agent_counts = [5, 10, 25, 50, 100]
     
     for num_agents in agent_counts:
@@ -170,12 +170,12 @@ def scalability_experiment(args):
 
 
 def tax_year_ablation_experiment(args):
-    """Run tax year length ablation experiment."""
+    """課税年度の長さに関するアブレーション実験を実行する。"""
     timescales = [5, 10, 25, 50, 100]
     
     for timescale in timescales:
-        # Adjust max_timesteps to have similar number of tax years
-        max_timesteps = timescale * 20  # 20 tax years
+        # 同程度の課税年度数になるよう max_timesteps を調整
+        max_timesteps = timescale * 20  # 20課税年度
         
         base_cmd = [
             sys.executable, "-m", "llm_economist.main",
@@ -203,51 +203,51 @@ def tax_year_ablation_experiment(args):
 
 
 def main():
-    """Main experiment runner."""
-    parser = argparse.ArgumentParser(description="Run LLM Economist experiments")
-    
-    # Experiment selection
+    """メインの実験実行関数。"""
+    parser = argparse.ArgumentParser(description="LLM Economist の実験を実行する")
+
+    # 実験の選択
     parser.add_argument("--experiment", type=str, default="all",
-                        choices=["rational", "bounded", "democratic", 
-                                "llm_comparison", "scalability", 
+                        choices=["rational", "bounded", "democratic",
+                                "llm_comparison", "scalability",
                                 "tax_year_ablation", "all"],
-                        help="Which experiment to run")
-    
-    # Common parameters
+                        help="実行する実験")
+
+    # 共通パラメータ
     parser.add_argument("--num-agents", type=int, default=5,
-                        help="Number of agents")
+                        help="エージェント数")
     parser.add_argument("--max-timesteps", type=int, default=2500,
-                        help="Maximum timesteps")
+                        help="最大タイムステップ数")
     parser.add_argument("--history-len", type=int, default=50,
-                        help="History length")
+                        help="履歴の長さ")
     parser.add_argument("--two-timescale", type=int, default=25,
-                        help="Two timescale parameter")
+                        help="2タイムスケールパラメータ")
     parser.add_argument("--prompt-algo", type=str, default="io",
                         choices=["io", "cot"],
-                        help="Prompting algorithm")
+                        help="プロンプトアルゴリズム")
     parser.add_argument("--llm", type=str, default="gpt-4o-mini",
-                        help="LLM model to use")
+                        help="使用するLLMモデル")
     parser.add_argument("--port", type=int, default=8000,
-                        help="Port for local LLM server")
+                        help="ローカルLLMサーバーのポート")
     parser.add_argument("--service", type=str, default="vllm",
                         choices=["vllm", "ollama"],
-                        help="Local LLM service")
-    
-    # Bounded rationality parameters
+                        help="ローカルLLMサービス")
+
+    # 限定合理性パラメータ
     parser.add_argument("--percent-ego", type=int, default=100,
-                        help="Percentage of egotistical agents")
+                        help="利己的エージェントの割合")
     parser.add_argument("--percent-alt", type=int, default=0,
-                        help="Percentage of altruistic agents")
+                        help="利他的エージェントの割合")
     parser.add_argument("--percent-adv", type=int, default=0,
-                        help="Percentage of adversarial agents")
-    
-    # Logging
+                        help="敵対的エージェントの割合")
+
+    # ログ
     parser.add_argument("--wandb", action="store_true",
-                        help="Enable WandB logging")
+                        help="WandBログを有効にする")
     
     args = parser.parse_args()
     
-    # Run selected experiment(s)
+    # 選択された実験を実行
     if args.experiment == "rational" or args.experiment == "all":
         rational_agents_experiment(args)
     
@@ -268,7 +268,7 @@ def main():
     if args.experiment == "tax_year_ablation" or args.experiment == "all":
         tax_year_ablation_experiment(args)
     
-    print("Experiments completed!")
+    print("全実験が完了しました!")
 
 
 if __name__ == "__main__":

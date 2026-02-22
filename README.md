@@ -9,48 +9,48 @@
   <img src="fig/llm_econ_fig1.jpg" alt="LLM Economist Figure 1" width="600"/>
 </p>
 
-A comprehensive framework for economic simulations using Large Language Models (LLMs). The LLM Economist leverages state-of-the-art language models to create realistic, dynamic economic simulations with diverse agent populations for studying tax policy optimization and mechanism design.
+大規模言語モデル（LLM）を用いた経済シミュレーションのための包括的フレームワークです。LLM Economist は最先端の言語モデルを活用し、多様なエージェント集団によるリアルで動的な経済シミュレーションを構築することで、税制最適化やメカニズムデザインの研究を可能にします。
 
-## 🚀 Features
+## 🚀 特徴
 
-- **Multi-LLM Support**: Compatible with OpenAI GPT, Google Gemini, Anthropic Claude, Meta Llama, and more
-- **Multiple Deployment Options**: Local (vLLM, Ollama), cloud APIs (OpenAI, OpenRouter), and Google AI
-- **Diverse Economic Scenarios**: Rational agents, bounded rationality, and democratic voting mechanisms
-- **Realistic Agent Personas**: LLM-generated personas based on real demographic and occupational data
-- **Scalable Architecture**: Support for 3-1000+ agents with efficient parallel processing
-- **Comprehensive Testing**: Full test suite with real API integration testing
-- **Reproducible Research**: Standardized experiment scripts and configuration management
+- **マルチ LLM 対応**: OpenAI GPT、Google Gemini、Anthropic Claude、Meta Llama など多数のモデルに対応
+- **複数のデプロイ方式**: ローカル（vLLM、Ollama）、クラウド API（OpenAI、OpenRouter）、Google AI
+- **多様な経済シナリオ**: 合理的エージェント、限定合理性、民主的投票メカニズム
+- **リアルなエージェントペルソナ**: 実際の人口統計・職業データに基づく LLM 生成ペルソナ
+- **スケーラブルなアーキテクチャ**: 効率的な並列処理により 3〜1000 以上のエージェントをサポート
+- **包括的なテスト**: 実際の API 統合テストを含む完全なテストスイート
+- **再現可能な研究**: 標準化された実験スクリプトと構成管理
 
-## 📖 Overview
+## 📖 概要
 
-The LLM Economist framework models economic systems as a two-level multi-agent reinforcement learning problem, implemented as a Stackelberg game where:
+LLM Economist フレームワークは、経済システムを二層のマルチエージェント強化学習問題としてモデル化し、シュタッケルベルグゲームとして実装しています：
 
-1. **Tax Planner (Leader)**: Sets tax policies to maximize social welfare
-2. **Workers (Followers)**: Optimize labor allocation based on tax policies and individual utility functions
+1. **税制プランナー（リーダー）**: 社会的厚生を最大化するよう税制を設定
+2. **労働者（フォロワー）**: 税制と個々の効用関数に基づいて労働配分を最適化
 
-Key innovations include:
-- **In-context optimization** for rational utility functions
-- **Synthetic demographic data** for realistic agent diversity using real occupation, age, and gender statistics
-- **LLM-generated personas** that create unique, realistic economic agents
-- **Mechanism design** for positive societal influence
+主な技術的革新：
+- 合理的効用関数のための**インコンテキスト最適化**
+- 実際の職業・年齢・性別統計を用いた**合成人口統計データ**によるリアルなエージェント多様性
+- ユニークでリアルな経済エージェントを生成する **LLM 生成ペルソナ**
+- 社会にポジティブな影響を与える**メカニズムデザイン**
 
-## 🛠️ Installation
+## 🛠️ インストール
 
-### Initialize Conda Environment
+### Conda 環境の初期化
 
 ```bash
-# Create and activate the environment
+# 環境の作成と有効化
 conda create -n LLMEconomist python=3.11 -y
 conda activate LLMEconomist
 ```
 
-### Quick Install
+### クイックインストール
 
 ```bash
 pip install llm-economist
 ```
 
-### Development Install
+### 開発用インストール
 
 ```bash
 git clone https://github.com/sethkarten/LLMEconomist.git
@@ -58,177 +58,177 @@ cd LLMEconomist
 pip install -e .
 ```
 
-### Dependencies
+### 依存関係
 
-The framework supports multiple LLM providers. Install additional dependencies as needed:
+本フレームワークは複数の LLM プロバイダーに対応しています。必要に応じて追加の依存関係をインストールしてください：
 
 ```bash
-# For local LLM serving
+# ローカル LLM サーバー用
 pip install vllm ollama
 
-# For Google Gemini
+# Google Gemini 用
 pip install google-generativeai
 
-# For development
+# 開発用
 pip install -e .[dev]
 ```
 
-## 🚦 Quick Start
+## 🚦 クイックスタート
 
-### 1. Set up API Keys
+### 1. API キーの設定
 
-Choose your preferred LLM provider and set the corresponding API key:
+使用する LLM プロバイダーを選び、対応する API キーを設定してください：
 
 ```bash
 # OpenAI
 export OPENAI_API_KEY="your_openai_key"
 
-# OpenRouter (for multiple models)
+# OpenRouter（複数モデル対応）
 export OPENROUTER_API_KEY="your_openrouter_key"
 
 # Google Gemini
 export GOOGLE_API_KEY="your_google_key"
 ```
 
-### 2. Run Your First Simulation
+### 2. 初めてのシミュレーション実行
 
 ```bash
-# Simple rational agents simulation
+# 合理的エージェントによるシンプルなシミュレーション
 python -m llm_economist.main --scenario rational --num-agents 5 --max-timesteps 500
 
-# Bounded rationality simulation (note: currently uses 100% egotistical agents with personas)
+# 限定合理性シミュレーション（注: 現在はペルソナ付きの100%利己的エージェントを使用）
 python -m llm_economist.main --scenario bounded --num-agents 10 --percent-ego 100
 
-# Democratic voting simulation
+# 民主的投票シミュレーション
 python -m llm_economist.main --scenario democratic --num-agents 15 --two-timescale 50
 ```
 
-### 3. Try Different LLM Models
+### 3. 異なる LLM モデルを試す
 
 ```bash
 # OpenAI GPT-4
 python -m llm_economist.main --llm gpt-4o --scenario rational
 
-# Local Llama via vLLM (requires local server)
+# vLLM 経由のローカル Llama（ローカルサーバーが必要）
 python -m llm_economist.main --llm meta-llama/Llama-3.1-8B-Instruct --service vllm --port 8000
 
-# Claude via OpenRouter
+# OpenRouter 経由の Claude
 python -m llm_economist.main --llm anthropic/claude-3.5-sonnet --use-openrouter
 
 # Google Gemini
 python -m llm_economist.main --llm gemini-1.5-flash
 ```
 
-## 🏗️ Project Structure
+## 🏗️ プロジェクト構成
 
 ```
 LLMEconomist/
-├── llm_economist/              # Main package
-│   ├── agents/                 # Agent implementations
-│   │   ├── worker.py          # Worker agent logic
-│   │   ├── planner.py         # Tax planner logic
-│   │   └── llm_agent.py       # Base LLM agent class
-│   ├── models/                 # LLM model integrations
-│   │   ├── openai_model.py    # OpenAI GPT models
-│   │   ├── gemini_model.py    # Google Gemini models
-│   │   ├── vllm_model.py      # Local vLLM/Ollama models
+├── llm_economist/              # メインパッケージ
+│   ├── agents/                 # エージェント実装
+│   │   ├── worker.py          # 労働者エージェントロジック
+│   │   ├── planner.py         # 税制プランナーロジック
+│   │   └── llm_agent.py       # LLM エージェント基底クラス
+│   ├── models/                 # LLM モデル統合
+│   │   ├── openai_model.py    # OpenAI GPT モデル
+│   │   ├── gemini_model.py    # Google Gemini モデル
+│   │   ├── vllm_model.py      # ローカル vLLM/Ollama モデル
 │   │   ├── openrouter_model.py # OpenRouter API
-│   │   └── base.py            # Base model interface
-│   ├── utils/                  # Utility functions
-│   │   ├── common.py          # Common utilities
-│   │   └── bracket.py         # Tax bracket utilities
-│   ├── data/                   # Demographic data files
-│   └── main.py                 # Main entry point
-├── experiments/                # Experiment scripts
-├── examples/                   # Usage examples
-│   ├── quick_start.py         # Basic functionality tests
-│   └── advanced_usage.py      # Simulation scenario tests
-├── tests/                      # Test suite
-└── README.md                   # This file
+│   │   └── base.py            # モデル基底インターフェース
+│   ├── utils/                  # ユーティリティ関数
+│   │   ├── common.py          # 共通ユーティリティ
+│   │   └── bracket.py         # 税率区分ユーティリティ
+│   ├── data/                   # 人口統計データファイル
+│   └── main.py                 # メインエントリーポイント
+├── experiments/                # 実験スクリプト
+├── examples/                   # 使用例
+│   ├── quick_start.py         # 基本機能テスト
+│   └── advanced_usage.py      # シミュレーションシナリオテスト
+├── tests/                      # テストスイート
+└── README.md                   # 本ファイル
 ```
 
-## 🔧 Configuration Options
+## 🔧 設定オプション
 
-### Simulation Parameters
+### シミュレーションパラメータ
 
-| Parameter | Description | Default | Options |
-|-----------|-------------|---------|---------|
-| `--scenario` | Economic scenario | `rational` | `rational`, `bounded`, `democratic` |
-| `--num-agents` | Number of worker agents | `5` | `1-1000+` |
-| `--max-timesteps` | Simulation length | `1000` | Any positive integer |
-| `--two-timescale` | Steps between tax updates | `25` | Any positive integer |
+| パラメータ | 説明 | デフォルト値 | 選択肢 |
+|-----------|------|------------|--------|
+| `--scenario` | 経済シナリオ | `rational` | `rational`, `bounded`, `democratic` |
+| `--num-agents` | 労働者エージェント数 | `5` | `1-1000+` |
+| `--max-timesteps` | シミュレーション長 | `1000` | 任意の正の整数 |
+| `--two-timescale` | 税制更新間のステップ数 | `25` | 任意の正の整数 |
 
-### LLM Configuration
+### LLM 設定
 
-| Parameter | Description | Default | Options |
-|-----------|-------------|---------|---------|
-| `--llm` | LLM model to use | `gpt-4o-mini` | See supported models below |
-| `--prompt-algo` | Prompting strategy | `io` | `io`, `cot` |
-| `--service` | Local LLM service | `vllm` | `vllm`, `ollama` |
-| `--port` | Local server port | `8000` | Any valid port |
+| パラメータ | 説明 | デフォルト値 | 選択肢 |
+|-----------|------|------------|--------|
+| `--llm` | 使用する LLM モデル | `gpt-4o-mini` | 下記の対応モデルを参照 |
+| `--prompt-algo` | プロンプト戦略 | `io` | `io`, `cot` |
+| `--service` | ローカル LLM サービス | `vllm` | `vllm`, `ollama` |
+| `--port` | ローカルサーバーポート | `8000` | 任意の有効なポート |
 
-### Agent Configuration
+### エージェント設定
 
-| Parameter | Description | Default | Options |
-|-----------|-------------|---------|---------|
-| `--worker-type` | Worker agent type | `LLM` | `LLM`, `FIXED` |
-| `--planner-type` | Planner agent type | `LLM` | `LLM`, `US_FED`, `UNIFORM` |
-| `--percent-ego` | % egotistical agents | `100` | `0-100` |
-| `--percent-alt` | % altruistic agents | `0` | `0-100` |
-| `--percent-adv` | % adversarial agents | `0` | `0-100` |
+| パラメータ | 説明 | デフォルト値 | 選択肢 |
+|-----------|------|------------|--------|
+| `--worker-type` | 労働者エージェントタイプ | `LLM` | `LLM`, `FIXED` |
+| `--planner-type` | プランナーエージェントタイプ | `LLM` | `LLM`, `US_FED`, `UNIFORM` |
+| `--percent-ego` | 利己的エージェントの割合 (%) | `100` | `0-100` |
+| `--percent-alt` | 利他的エージェントの割合 (%) | `0` | `0-100` |
+| `--percent-adv` | 敵対的エージェントの割合 (%) | `0` | `0-100` |
 
-**Note**: Currently, personas (used in `bounded` and `democratic` scenarios) only support egotistical utility types, so mixed utility types are only available with default personas.
+**注意**: 現在、ペルソナ（`bounded` および `democratic` シナリオで使用）は利己的効用タイプのみをサポートしています。混合効用タイプはデフォルトペルソナでのみ使用可能です。
 
-## 🤖 Supported LLM Models
+## 🤖 対応 LLM モデル
 
-### Cloud APIs
+### クラウド API
 
-**OpenAI Models:**
-- `gpt-4o` - Most capable, highest cost
-- `gpt-4o-mini` - Fast and cost-effective (recommended)
+**OpenAI モデル:**
+- `gpt-4o` - 最高性能、最高コスト
+- `gpt-4o-mini` - 高速かつコスト効率に優れる（推奨）
 
-**Via OpenRouter (requires OPENROUTER_API_KEY):**
-- `meta-llama/llama-3.1-8b-instruct` - Open source, good performance
-- `meta-llama/llama-3.1-70b-instruct` - Larger Llama model
-- `anthropic/claude-3.5-sonnet` - Excellent reasoning
-- `google/gemini-flash-1.5` - Fast Google model
+**OpenRouter 経由（OPENROUTER_API_KEY が必要）:**
+- `meta-llama/llama-3.1-8b-instruct` - オープンソース、良好な性能
+- `meta-llama/llama-3.1-70b-instruct` - より大規模な Llama モデル
+- `anthropic/claude-3.5-sonnet` - 優れた推論能力
+- `google/gemini-flash-1.5` - 高速な Google モデル
 
-**Google Gemini (requires GOOGLE_API_KEY):**
-- `gemini-1.5-pro` - Most capable Gemini model
-- `gemini-1.5-flash` - Fast and efficient (recommended)
+**Google Gemini（GOOGLE_API_KEY が必要）:**
+- `gemini-1.5-pro` - 最高性能の Gemini モデル
+- `gemini-1.5-flash` - 高速かつ効率的（推奨）
 
-### Local Deployment
+### ローカルデプロイ
 
-**vLLM (Recommended for local deployment):**
+**vLLM（ローカルデプロイ推奨）:**
 ```bash
-# Start vLLM server
+# vLLM サーバーの起動
 vllm serve meta-llama/Llama-3.1-8B-Instruct --port 8000
 
-# Use in simulation
+# シミュレーションで使用
 python -m llm_economist.main --llm meta-llama/Llama-3.1-8B-Instruct --service vllm --port 8000
 ```
 
-**Ollama (Easy local setup):**
+**Ollama（簡単なローカルセットアップ）:**
 ```bash
-# Install and start Ollama
+# Ollama のインストールと起動
 ollama pull llama3.1:8b
 ollama serve
 
-# Use in simulation
+# シミュレーションで使用
 python -m llm_economist.main --llm llama3.1:8b --service ollama --port 11434
 ```
 
-## 📊 Experiment Scripts
+## 📊 実験スクリプト
 
-### Pre-configured Experiments
+### 事前設定済み実験
 
-Run the experiments from the paper:
+論文の実験を実行します：
 
 ```bash
-# All experiments
+# 全実験
 python experiments/run_experiments.py --experiment all
 
-# Specific experiments
+# 個別実験
 python experiments/run_experiments.py --experiment rational
 python experiments/run_experiments.py --experiment bounded
 python experiments/run_experiments.py --experiment democratic
@@ -236,274 +236,274 @@ python experiments/run_experiments.py --experiment llm_comparison
 python experiments/run_experiments.py --experiment scalability
 ```
 
-### Custom Experiments
+### カスタム実験
 
 ```bash
-# Chain of thought prompting
+# Chain of Thought プロンプティング
 python -m llm_economist.main --prompt-algo cot --llm gpt-4o
 
-# Input-output prompting (default)
+# Input-Output プロンプティング（デフォルト）
 python -m llm_economist.main --prompt-algo io --llm gpt-4o-mini
 
-# Large scale simulation
+# 大規模シミュレーション
 python -m llm_economist.main --num-agents 100 --max-timesteps 2000
 ```
 
-## 📈 Examples
+## 📈 使用例
 
-The framework provides two types of examples:
+本フレームワークは 2 種類の使用例を提供しています：
 
-### Basic Functionality Tests
+### 基本機能テスト
 
-For quick validation of imports, setup, and basic functionality:
+インポート、セットアップ、基本機能の簡易検証用：
 
 ```bash
-# Test all basic functionality
+# 全基本機能のテスト
 python examples/quick_start.py
 
-# Run specific basic tests
+# 個別の基本テストを実行
 python examples/quick_start.py --help
 ```
 
-The quick start script validates:
-- Package imports and dependencies
-- Argument parser configuration
-- API key detection
-- Basic Args object creation
-- Service configurations
+クイックスタートスクリプトが検証する内容：
+- パッケージのインポートと依存関係
+- 引数パーサーの設定
+- API キーの検出
+- 基本的な Args オブジェクトの作成
+- サービス設定
 
-### Advanced Usage Examples
+### 上級使用例
 
-For actual simulation testing with 20-timestep runs:
+20 タイムステップの実際のシミュレーションテスト用：
 
 ```bash
-# Run all simulation scenarios
+# 全シミュレーションシナリオの実行
 python examples/advanced_usage.py
 
-# Test specific scenarios
+# 個別シナリオのテスト
 python examples/advanced_usage.py rational          # OpenAI GPT-4o-mini
-python examples/advanced_usage.py bounded           # Bounded rationality with personas
-python examples/advanced_usage.py democratic        # Democratic voting mechanism
-python examples/advanced_usage.py fixed             # Fixed workers with LLM planner
+python examples/advanced_usage.py bounded           # ペルソナ付き限定合理性
+python examples/advanced_usage.py democratic        # 民主的投票メカニズム
+python examples/advanced_usage.py fixed             # 固定労働者 + LLM プランナー
 
-# Test different LLM providers
+# 異なる LLM プロバイダーのテスト
 python examples/advanced_usage.py openrouter        # OpenRouter API
-python examples/advanced_usage.py vllm              # Local vLLM server
-python examples/advanced_usage.py ollama            # Local Ollama
+python examples/advanced_usage.py vllm              # ローカル vLLM サーバー
+python examples/advanced_usage.py ollama            # ローカル Ollama
 python examples/advanced_usage.py gemini            # Google Gemini
 
-# Show available scenarios
+# 利用可能なシナリオの表示
 python examples/advanced_usage.py --help
 ```
 
-All advanced examples use 20 timesteps for thorough testing while remaining fast for development.
+全ての上級使用例は開発中の迅速な検証のため 20 タイムステップで実行されます。
 
-### Example Organization
+### 使用例の構成
 
-The examples are organized to provide clear separation of concerns:
+使用例は関心事の明確な分離を提供するよう整理されています：
 
-- **`quick_start.py`**: Lightweight validation of basic functionality without running simulations
-  - Tests imports and dependencies
-  - Validates configuration setup
-  - Checks API key availability
-  - Fast execution (< 10 seconds)
+- **`quick_start.py`**: シミュレーションを実行せずに基本機能を軽量に検証
+  - インポートと依存関係のテスト
+  - 設定セットアップの検証
+  - API キーの利用可能性チェック
+  - 高速実行（10 秒未満）
 
-- **`advanced_usage.py`**: Full simulation testing with real LLM APIs
-  - 20-timestep economic simulations
-  - All scenarios: rational, bounded, democratic, fixed workers
-  - Multiple LLM providers: OpenAI, OpenRouter, vLLM, Ollama, Gemini
-  - Realistic testing (2-10 minutes per scenario)
+- **`advanced_usage.py`**: 実際の LLM API を使用したフルシミュレーションテスト
+  - 20 タイムステップの経済シミュレーション
+  - 全シナリオ: rational, bounded, democratic, fixed workers
+  - 複数の LLM プロバイダー: OpenAI, OpenRouter, vLLM, Ollama, Gemini
+  - 実践的なテスト（シナリオあたり 2〜10 分）
 
-## 🧪 Testing
+## 🧪 テスト
 
-The framework includes comprehensive tests organized into three categories:
+本フレームワークは 3 つのカテゴリに分類された包括的なテストを含んでいます：
 
-### Basic Functionality Tests
+### 基本機能テスト
 
 ```bash
-# Test basic functionality (imports, setup, configuration)
+# 基本機能のテスト（インポート、セットアップ、設定）
 pytest tests/test_quickstart.py -v
 
-# Test individual components
-python examples/quick_start.py  # Direct basic functionality validation
+# 個別コンポーネントのテスト
+python examples/quick_start.py  # 基本機能の直接検証
 ```
 
-### Integration Tests
+### 統合テスト
 
 ```bash
-# Test LLM model integrations
+# LLM モデル統合のテスト
 pytest tests/test_models.py -v
 
-# Test simulation logic with mocking
+# モックを使用したシミュレーションロジックのテスト
 pytest tests/test_simulation.py -v
 
-# Test advanced usage scenarios (requires API keys)
+# 上級使用シナリオのテスト（API キーが必要）
 pytest tests/test_advanced_usage.py -v
 ```
 
-### End-to-End Tests
+### エンドツーエンドテスト
 
 ```bash
-# Test actual simulations with real APIs
-python examples/advanced_usage.py           # All scenarios
-python examples/advanced_usage.py rational  # Specific scenario
+# 実際の API を使用したシミュレーションのテスト
+python examples/advanced_usage.py           # 全シナリオ
+python examples/advanced_usage.py rational  # 個別シナリオ
 ```
 
-### Full Test Suite
+### フルテストスイート
 
 ```bash
-# Run all tests
+# 全テストの実行
 pytest -v
 
-# Run with coverage
+# カバレッジ付きで実行
 pytest --cov=llm_economist --cov-report=html
 ```
 
-### Test Requirements
+### テスト要件
 
-- **API Keys**: Advanced usage and integration tests require API keys:
-  - `OPENAI_API_KEY` or `ECON_OPENAI` (required for most tests)
-  - `OPENROUTER_API_KEY` (optional, for OpenRouter tests)
-  - `GOOGLE_API_KEY` (optional, for Gemini tests)
-- **Real Integration**: Advanced tests use actual LLM APIs to ensure end-to-end functionality
-- **Fast Execution**: All tests use 20 timesteps or less for quick validation
-- **Local Servers**: vLLM and Ollama tests require running local servers (will skip if not available)
+- **API キー**: 上級使用テストと統合テストには API キーが必要です：
+  - `OPENAI_API_KEY` または `ECON_OPENAI`（ほとんどのテストに必要）
+  - `OPENROUTER_API_KEY`（オプション、OpenRouter テスト用）
+  - `GOOGLE_API_KEY`（オプション、Gemini テスト用）
+- **実際の統合**: 上級テストはエンドツーエンドの機能を確認するため実際の LLM API を使用します
+- **高速実行**: 全テストは迅速な検証のため 20 タイムステップ以下で実行されます
+- **ローカルサーバー**: vLLM と Ollama のテストにはローカルサーバーの起動が必要です（利用不可の場合はスキップされます）
 
-## 🎭 Agent Personas
+## 🎭 エージェントペルソナ
 
-The framework generates realistic agent personas using:
+本フレームワークは以下を使用してリアルなエージェントペルソナを生成します：
 
-1. **Demographic Sampling**: Real occupation, age, and gender statistics from census data
-2. **LLM Generation**: Each persona is uniquely generated based on sampled demographics
-3. **Economic Realism**: Personas include realistic income levels, risk tolerance, and life circumstances
+1. **人口統計サンプリング**: 国勢調査データに基づく実際の職業・年齢・性別統計
+2. **LLM 生成**: サンプリングされた人口統計に基づき各ペルソナをユニークに生成
+3. **経済的リアリズム**: リアルな所得水準、リスク許容度、生活環境を含むペルソナ
 
-Example generated personas:
-- *"You are a 55-year-old female working as a licensed practical nurse... With over 30 years of experience, you prioritize savings for retirement and healthcare needs."*
-- *"You are a 53-year-old male working as a welding worker... concerns about retirement savings keep you financially cautious."*
+生成されたペルソナの例：
+- *「あなたは55歳の女性で、准看護師として働いています... 30年以上の経験を持ち、退職後の貯蓄と医療ニーズを優先しています。」*
+- *「あなたは53歳の男性で、溶接工として働いています... 退職後の貯蓄への懸念から、財政的に慎重な姿勢を取っています。」*
 
-## 📚 Research Reproduction
+## 📚 研究の再現
 
-To reproduce the experiments from the LLM Economist paper:
+LLM Economist 論文の実験を再現するには：
 
-### Setup
+### セットアップ
 
-1. **Environment Setup:**
+1. **環境セットアップ:**
    ```bash
    git clone https://github.com/sethkarten/LLMEconomist.git
    cd LLMEconomist
    pip install -e .
-   export WANDB_API_KEY="your_wandb_key"  # For experiment tracking
+   export WANDB_API_KEY="your_wandb_key"  # 実験追跡用
    ```
 
-2. **LLM Setup (choose one):**
-   
-   **Option A: OpenAI (easiest):**
+2. **LLM セットアップ（いずれかを選択）:**
+
+   **オプション A: OpenAI（最も簡単）:**
    ```bash
    export OPENAI_API_KEY="your_key"
    ```
-   
-   **Option B: Local vLLM (most cost-effective):**
+
+   **オプション B: ローカル vLLM（最もコスト効率が良い）:**
    ```bash
-   # Start vLLM server with Llama 3.1 8B
+   # Llama 3.1 8B で vLLM サーバーを起動
    vllm serve meta-llama/Llama-3.1-8B-Instruct --tensor-parallel-size 1 --port 8000
    ```
 
-### Main Experiments
+### メイン実験
 
 ```bash
-# Rational agents 
+# 合理的エージェント
 python experiments/run_experiments.py --experiment rational --wandb
 
-# Bounded rationality 
+# 限定合理性
 python experiments/run_experiments.py --experiment bounded --wandb
 
-# Democratic voting 
+# 民主的投票
 python experiments/run_experiments.py --experiment democratic --wandb
 
-# LLM comparison 
+# LLM 比較
 python experiments/run_experiments.py --experiment llm_comparison --wandb
 
-# Scalability analysis 
+# スケーラビリティ分析
 python experiments/run_experiments.py --experiment scalability --wandb
 
 
 ```
 
-## 🚀 Advanced Features
+## 🚀 上級機能
 
-### Custom Agent Types
+### カスタムエージェントタイプ
 
-Extend the framework with custom agent behaviors:
+カスタムエージェント動作でフレームワークを拡張できます：
 
 ```python
 from llm_economist.agents.worker import Worker
 
 class CustomWorker(Worker):
     def compute_utility(self, income, rebate):
-        # Custom utility function
+        # カスタム効用関数
         return your_custom_utility_logic(income, rebate)
 ```
 
-### Custom LLM Models
+### カスタム LLM モデル
 
-Add support for new LLM providers:
+新しい LLM プロバイダーのサポートを追加できます：
 
 ```python
 from llm_economist.models.base import BaseLLMModel
 
 class CustomLLMModel(BaseLLMModel):
     def send_msg(self, system_prompt, user_prompt, temperature=None, json_format=False):
-        # Implement your model's API
+        # モデルの API を実装
         return response, is_json
 ```
 
-### Experiment Tracking
+### 実験追跡
 
-Enable detailed experiment tracking with Weights & Biases:
+Weights & Biases を使用した詳細な実験追跡を有効にできます：
 
 ```bash
 python -m llm_economist.main --wandb --scenario bounded --num-agents 20
 ```
 
-## 🐛 Troubleshooting
+## 🐛 トラブルシューティング
 
-### Common Issues
+### よくある問題
 
-**API Key Errors:**
+**API キーエラー:**
 ```bash
-# Make sure your API keys are set correctly
+# API キーが正しく設定されていることを確認
 echo $OPENAI_API_KEY
 echo $OPENROUTER_API_KEY
 echo $GOOGLE_API_KEY
 ```
 
-**Local Model Connection:**
+**ローカルモデルの接続:**
 ```bash
-# Check if vLLM server is running
+# vLLM サーバーが稼働中か確認
 curl http://localhost:8000/health
 
-# Check Ollama status
+# Ollama のステータスを確認
 ollama list
 ```
 
-**Memory Issues:**
-- Reduce `--num-agents` for large simulations
-- Use `gpt-4o-mini` instead of `gpt-4o` for cost efficiency
-- Adjust `--history-len` to reduce memory usage
+**メモリの問題:**
+- 大規模シミュレーションでは `--num-agents` を減らしてください
+- コスト効率のため `gpt-4o` の代わりに `gpt-4o-mini` を使用してください
+- メモリ使用量を削減するため `--history-len` を調整してください
 
-**Rate Limiting:**
-- Add delays between API calls
-- Use local models (vLLM/Ollama) for unrestricted access
-- Switch to OpenRouter for higher rate limits
+**レート制限:**
+- API コール間に遅延を追加してください
+- 制限なしのアクセスにはローカルモデル（vLLM/Ollama）を使用してください
+- より高いレート制限のため OpenRouter に切り替えてください
 
-**Test Failures:**
-- Ensure API keys are set for quickstart tests
-- Check network connectivity for cloud API tests
-- Verify local model servers are running for local tests
+**テストの失敗:**
+- クイックスタートテストには API キーが設定されていることを確認してください
+- クラウド API テストにはネットワーク接続を確認してください
+- ローカルテストにはローカルモデルサーバーが稼働中であることを確認してください
 
-## 📄 Citation
+## 📄 引用
 
-If you use this framework in your research, please cite:
+本フレームワークを研究に使用する場合は、以下を引用してください：
 
 ```bibtex
 @article{karten2025llm,
@@ -514,6 +514,6 @@ If you use this framework in your research, please cite:
 }
 ```
 
-## 📝 License
+## 📝 ライセンス
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+本プロジェクトは MIT ライセンスの下で公開されています。詳細は [LICENSE](LICENSE) ファイルをご覧ください。

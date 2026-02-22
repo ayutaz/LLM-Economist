@@ -1,5 +1,5 @@
 """
-Main entry point for the LLM Economist framework.
+LLM Economistフレームワークのメインエントリーポイント。
 """
 
 import argparse
@@ -19,7 +19,7 @@ from .agents.planner import TaxPlanner, FixedTaxPlanner
 
 
 def setup_logging(args):
-    """Setup logging configuration."""
+    """ロギング設定のセットアップ。"""
     if not os.path.exists(args.log_dir):
         os.makedirs(args.log_dir)
     
@@ -32,10 +32,10 @@ def setup_logging(args):
 
 
 def run_simulation(args):
-    """Run the main simulation."""
+    """メインシミュレーションを実行する。"""
     logger = logging.getLogger('main')
     
-    # Test LLM connectivity
+    # LLM接続テスト
     if args.worker_type == 'LLM' or args.planner_type == 'LLM':
         try:
             TestAgent(args.llm, args.port, args)
@@ -45,18 +45,18 @@ def run_simulation(args):
             if args.worker_type == 'LLM' or args.planner_type == 'LLM':
                 sys.exit(1)
     
-    # Initialize skill distribution
+    # スキル分布の初期化
     if args.agent_mix == 'uniform':
-        skills = [-1] * args.num_agents  # maps to uniform distribution in worker.py
+        skills = [-1] * args.num_agents  # worker.pyで一様分布にマッピング
     elif args.agent_mix == 'us_income':
-        # U.S. incomes to skill level (income level is at 40 hours per week)
+        # 米国所得をスキルレベルに変換 (所得水準は週40時間労働時)
         skills = [float(x / 40) for x in rGB2(args.num_agents)] 
         print(skills)
         logger.info(f"Skills sampled from GB2 Distribution: {skills}")
     else:
-        raise ValueError(f'Unknown agent mix: {args.agent_mix}')
+        raise ValueError(f'不明なエージェントミックス: {args.agent_mix}')
     
-    # Initialize agents
+    # エージェントの初期化
     agents = []
     personas = []
     
@@ -64,7 +64,7 @@ def run_simulation(args):
         personas = ['default' for i in range(args.num_agents)]
         utility_types = ['egotistical' for i in range(args.num_agents)]
     elif args.scenario in ('bounded', 'democratic'):
-        # Generate personas
+        # ペルソナの生成
         persona_data = distribute_personas(args.num_agents, args.llm, args.port, args.service)
         global GEN_ROLE_MESSAGES
         GEN_ROLE_MESSAGES.clear()
@@ -76,7 +76,7 @@ def run_simulation(args):
         print('utility_types', utility_types)
         logger.info(f"Utility Types: {utility_types}")
     
-    # Create worker agents
+    # ワーカーエージェントの作成
     for i in range(args.num_agents):
         name = f"worker_{i}"
         if args.worker_type == 'LLM' or (args.worker_type == 'ONE_LLM' and i == 0):
@@ -98,7 +98,7 @@ def run_simulation(args):
             agent = FixedWorker(name, history_len=args.history_len, labor=np.random.randint(40, 61), args=args)
         agents.append(agent)
     
-    # Initialize tax planner
+    # 税プランナーの初期化
     if args.planner_type == 'LLM':
         planner_history = args.history_len
         if args.num_agents > 20:
@@ -111,7 +111,7 @@ def run_simulation(args):
         tax_planner = FixedTaxPlanner('Joe', args.planner_type, history_len=args.history_len, skills=skills, args=args)
     tax_rates = tax_planner.tax_rates
     
-    # Initialize wandb logging
+    # wandbロギングの初期化
     if args.wandb:
         experiment_name = generate_experiment_name(args)
         wandb.init(
@@ -122,19 +122,19 @@ def run_simulation(args):
     
     start_time = time.time()
     
-    # Main simulation loop
+    # メインシミュレーションループ
     for k in range(args.max_timesteps):
         logger.info(f"TIMESTEP {k}")
         print(f"TIMESTEP {k}")
         
         wandb_logger = {}
         
-        # Get new tax rates
+        # 新しい税率の取得
         workers_stats = [(agent.z, agent.utility) for agent in agents]
-        # do not set tax rates during warmup period
+        # ウォームアップ期間中は税率を設定しない
         if k % args.two_timescale == 0 and args.planner_type == 'LLM' and k >= args.warmup:
             if args.scenario == 'democratic':
-                # Use ThreadPoolExecutor for parallel execution of agent actions
+                # ThreadPoolExecutorを使用してエージェントアクションを並列実行
                 with concurrent.futures.ThreadPoolExecutor(max_workers=args.num_agents) as executor:
                     if args.platforms:
                         max_retries = 10
@@ -144,12 +144,12 @@ def run_simulation(args):
                             futures0 = [executor.submit(agent.act_pre_vote, k) for agent in agents]
                             concurrent.futures.wait(futures0)
                             candidates = [(agent.name.split("_")[-1], agent.platform) for agent in agents if agent.platform != None]
-                            retry_count += 1  # Prevent infinite loop
+                            retry_count += 1  # 無限ループの防止
                         logger.info(f"Candidates: {candidates}")
                         print("Candidates: ", candidates)
                         if not candidates:
-                            print("No candidates, so all agent.vote were not updated, and current leader stays in power")
-                            logger.info(f"No candidates, so all agent.vote were not updated, and current leader stays in power")
+                            print("候補者なし。全エージェントの投票は更新されず、現在のリーダーが政権を維持します")
+                            logger.info(f"候補者なし。全エージェントの投票は更新されず、現在のリーダーが政権を維持します")
                         else:
                             futures = [executor.submit(agent.act_vote_platform, candidates, k) for agent in agents]
                             concurrent.futures.wait(futures)
@@ -159,7 +159,7 @@ def run_simulation(args):
                 votes_list = [agent.vote for agent in agents]
                 print("Votes: ", votes_list)
                 leader_agent = count_votes(votes_list)
-                leader = agents[leader_agent] # unnecessary
+                leader = agents[leader_agent] # 不要
                 wandb_logger[f"leader"] = leader_agent
                 print("leader: ", leader_agent)
                 if args.platforms:
@@ -170,15 +170,15 @@ def run_simulation(args):
                     for agent in agents:
                         agent.update_leader(k, leader_agent)
                     tax_planner.update_leader(k, leader_agent)
-                # get tax rate
-                # get message from planner for agent features only
+                # 税率の取得
+                # エージェント特徴量のみのプランナーメッセージを取得
                 planner_state = tax_planner.get_state(k, workers_stats, True)
-                # find tax rate
+                # 税率を決定
                 tax_delta = agents[leader_agent].act_plan(k, planner_state)[0]
                 print("act_leader: ", tax_delta)
                 for agent in agents:
                     agent.update_leader_action(k, tax_delta)
-                tax_planner.update_leader_action(k, tax_delta) # not necessary potentially with act_log_only, which format preferred?
+                tax_planner.update_leader_action(k, tax_delta) # act_log_onlyとの併用では不要かもしれない
                 tax_rates = tax_planner.act_log_only(tax_delta, k)
                 for agent in agents:
                     agent.tax_rates = tax_rates
@@ -191,10 +191,10 @@ def run_simulation(args):
 
         planner_state = None
         if args.percent_ego < 100:
-            planner_state = tax_planner.get_state(k, workers_stats, False) # for adversarial and altruistic agents
+            planner_state = tax_planner.get_state(k, workers_stats, False) # 敵対的・利他的エージェント用
             
         if args.use_multithreading:
-            # Use ThreadPoolExecutor for parallel execution of agent actions
+            # ThreadPoolExecutorを使用してエージェントアクションを並列実行
             with concurrent.futures.ThreadPoolExecutor(max_workers=args.num_agents) as executor:
                 futures = [executor.submit(agent.act, k, tax_rates, planner_state) for agent in agents]
                 concurrent.futures.wait(futures)
@@ -204,12 +204,12 @@ def run_simulation(args):
 
         pre_tax_incomes = [agents[i].z for i in range(args.num_agents)]
         
-        # Calculate taxes
+        # 税金の計算
         post_tax_incomes, total_tax = tax_planner.apply_taxes(tax_rates, pre_tax_incomes)
         tax_indv = np.array(pre_tax_incomes) - np.array(post_tax_incomes)
         tax_rebate_avg = total_tax / args.num_agents
         
-        # Update agent utilities
+        # エージェントの効用を更新
         for i, agent in enumerate(agents):
             agent.tax_paid = tax_indv[i]
         if args.scenario == 'bounded' and args.use_multithreading:
@@ -222,8 +222,8 @@ def run_simulation(args):
         for i, agent in enumerate(agents):
             agent.log_stats(k, wandb_logger, debug=args.debug)
         
-        # Log tax planner stats
-        # use isoelastic utility by default for altruistic/adversarial planner swf
+        # 税プランナーの統計をログ
+        # 利他的/敵対的プランナーのSWFにはデフォルトで等弾力性効用を使用
         u = [agents[i].utility if agents[i].utility_type == 'egotistical' else agents[i].compute_isoelastic_utility(post_tax_incomes[i], tax_rebate_avg) for i in range(args.num_agents)]
         tax_planner.log_stats(k, wandb_logger, z=pre_tax_incomes, u=u, debug=args.debug)
         
@@ -232,7 +232,7 @@ def run_simulation(args):
             
         end_time = time.time()
         iteration_time = end_time - start_time
-        total_actions = (k + 1) * args.num_agents  # Total actions performed so far
+        total_actions = (k + 1) * args.num_agents  # これまでに実行された合計アクション数
 
         fps = (k + 1) / iteration_time
         aps = total_actions / iteration_time
@@ -244,97 +244,97 @@ def run_simulation(args):
         remaining_time = (args.max_timesteps - k - 1) * iteration_time / (k + 1)
         logger.info(f"Time remaining {k+2}-{args.max_timesteps}: {remaining_time:.5f} seconds")
 
-    logger.info("Simulation completed successfully!")
+    logger.info("シミュレーションが正常に完了しました!")
     
     if args.wandb:
         wandb.finish()
 
 
 def generate_experiment_name(args):
-    """Generate a descriptive experiment name."""
-    # Start with scenario and number of agents as base
+    """説明的な実験名を生成する。"""
+    # シナリオとエージェント数をベースとして開始
     name_parts = [f"{args.scenario}"]
     name_parts.append(f"a{args.num_agents}")
     
-    # Add agent composition if not all egotistical
+    # 全員が利己的でない場合、エージェント構成を追加
     if args.percent_ego != 100:
         name_parts.append(f"mix_e{args.percent_ego}_a{args.percent_alt}_d{args.percent_adv}")
     
-    # Add worker and planner types
+    # ワーカーとプランナーのタイプを追加
     name_parts.append(f"w-{args.worker_type}")
     name_parts.append(f"p-{args.planner_type}")
     
-    # Add LLM model (shortened)
+    # LLMモデル名を追加 (短縮)
     llm_name = args.llm.replace("llama3:", "l3-").replace("gpt-", "g").replace("-mini-2024-07-18", "m")
     name_parts.append(f"llm-{llm_name}")
     
-    # Add prompting algorithm
+    # プロンプティングアルゴリズムを追加
     name_parts.append(f"prompt-{args.prompt_algo}")
     
-    # Add timescale and history length
+    # タイムスケールと履歴長を追加
     name_parts.append(f"ts{args.two_timescale}")
     name_parts.append(f"hist{args.history_len}")
     
-    # Add max timesteps
+    # 最大タイムステップ数を追加
     name_parts.append(f"steps{args.max_timesteps}")
     
-    # Add bracket setting
+    # ブラケット設定を追加
     name_parts.append(f"bracket-{args.bracket_setting}")
     
-    # Add voting indicator if using platforms
+    # プラットフォーム使用時に投票インジケーターを追加
     if args.platforms:
         name_parts.append("voting")
     
-    # Join all parts with underscores
+    # 全パーツをアンダースコアで結合
     return "_".join(name_parts)
 
 
 def create_argument_parser():
-    """Create and return the argument parser."""
-    parser = argparse.ArgumentParser(description='AI Economist Simulation')
-    parser.add_argument('--num-agents', type=int, default=5, help='Number of agents in the simulation')
-    parser.add_argument('--worker-type', default='LLM', choices=['LLM', 'FIXED', 'ONE_LLM'], help='Type of worker agents')
-    parser.add_argument('--planner-type', default='LLM', choices=['LLM', 'US_FED', 'SAEZ', 'SAEZ_THREE', 'SAEZ_FLAT', 'UNIFORM'], help='Type of tax planner')
-    parser.add_argument('--max-timesteps', type=int, default=1000, help='Maximum number of timesteps for the simulation')
-    parser.add_argument('--history-len', type=int, default=50, help='Length of history to consider')
-    parser.add_argument('--two-timescale', type=int, default=25, help='Interval for two-timescale updates')
-    parser.add_argument('--debug', type=bool, default=True, help='Enable debug mode') 
-    parser.add_argument('--llm', default='llama3:8b', type=str, help='Language model to use')
-    parser.add_argument('--prompt-algo', default='io', choices=['io', 'cot'], help='Prompting algorithm to use')
-    parser.add_argument('--scenario', default='rational', choices=['rational', 'bounded', 'democratic'], help='Scenario')
+    """引数パーサーを作成して返す。"""
+    parser = argparse.ArgumentParser(description='AI Economistシミュレーション')
+    parser.add_argument('--num-agents', type=int, default=5, help='シミュレーション内のエージェント数')
+    parser.add_argument('--worker-type', default='LLM', choices=['LLM', 'FIXED', 'ONE_LLM'], help='ワーカーエージェントのタイプ')
+    parser.add_argument('--planner-type', default='LLM', choices=['LLM', 'US_FED', 'SAEZ', 'SAEZ_THREE', 'SAEZ_FLAT', 'UNIFORM'], help='税プランナーのタイプ')
+    parser.add_argument('--max-timesteps', type=int, default=1000, help='シミュレーションの最大タイムステップ数')
+    parser.add_argument('--history-len', type=int, default=50, help='考慮する履歴の長さ')
+    parser.add_argument('--two-timescale', type=int, default=25, help='2タイムスケール更新の間隔')
+    parser.add_argument('--debug', type=bool, default=True, help='デバッグモードを有効化')
+    parser.add_argument('--llm', default='llama3:8b', type=str, help='使用する言語モデル')
+    parser.add_argument('--prompt-algo', default='io', choices=['io', 'cot'], help='使用するプロンプティングアルゴリズム')
+    parser.add_argument('--scenario', default='rational', choices=['rational', 'bounded', 'democratic'], help='シナリオ')
     parser.add_argument('--percent-ego', type=int, default=100)
     parser.add_argument('--percent-alt', type=int, default=0)
     parser.add_argument('--percent-adv', type=int, default=0)
     parser.add_argument('--port', type=int, default=8009)
     parser.add_argument('--seed', type=int, default=42)
-    parser.add_argument('--agent-mix', default='us_income', choices=['uniform', 'us_income'], help='Distribution of agents\' skill level')
-    parser.add_argument('--platforms', action="store_true", help='Agents choose to run with a platform in election')
-    parser.add_argument('--name', type=str, default='', help='Experiment name')
-    parser.add_argument('--log-dir', type=str, default='logs', help='Directory for log files')
+    parser.add_argument('--agent-mix', default='us_income', choices=['uniform', 'us_income'], help='エージェントのスキルレベルの分布')
+    parser.add_argument('--platforms', action="store_true", help='エージェントが選挙でプラットフォームを掲げて立候補する')
+    parser.add_argument('--name', type=str, default='', help='実験名')
+    parser.add_argument('--log-dir', type=str, default='logs', help='ログファイルのディレクトリ')
     parser.add_argument('--bracket-setting', default='three', choices=['flat', 'three', 'US_FED'])
     parser.add_argument('--service', default='vllm', choices=['vllm', 'ollama'])
     parser.add_argument('--use-multithreading', action='store_true')
     parser.add_argument('--warmup', default=0, type=int)
-    parser.add_argument('--elasticity', nargs='+', type=float, default=[0.4], 
-                    help='Elasticity values for tax brackets')
-    parser.add_argument('--wandb', action='store_true', help='Enable wandb logging')
-    parser.add_argument('--timeout', type=int, default=30, help='Timeout for LLM calls')
-    
+    parser.add_argument('--elasticity', nargs='+', type=float, default=[0.4],
+                    help='税ブラケットの弾力性値')
+    parser.add_argument('--wandb', action='store_true', help='wandbロギングを有効化')
+    parser.add_argument('--timeout', type=int, default=30, help='LLM呼び出しのタイムアウト')
+
     return parser
 
 
 def main():
-    """Main entry point."""
+    """メインエントリーポイント。"""
     parser = create_argument_parser()
     args = parser.parse_args()
 
     if not args.name:
         args.name = generate_experiment_name(args)
 
-    # Setup logging
+    # ロギングのセットアップ
     setup_logging(args)
     
-    # Create a logger in the main process
+    # メインプロセスでロガーを作成
     logger = logging.getLogger('main')
     pid = os.getpid()
 
@@ -342,7 +342,7 @@ def main():
     logger.info(f'PID: {pid}')
     logger.info(args)
     
-    # Set random seeds
+    # 乱数シードの設定
     np.random.seed(args.seed)
     random.seed(args.seed)
     
@@ -351,7 +351,7 @@ def main():
     run_simulation(args)
     
     end_time = time.time()
-    print(f"Total simulation time: {end_time - start_time:.2f} seconds")
+    print(f"シミュレーション総時間: {end_time - start_time:.2f} 秒")
 
 
 if __name__ == '__main__':

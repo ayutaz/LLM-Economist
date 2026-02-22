@@ -1,5 +1,5 @@
 """
-LLM model implementations for the LLM Economist framework.
+LLM EconomistフレームワークのLLMモデル実装。
 """
 
 from .base import BaseLLMModel

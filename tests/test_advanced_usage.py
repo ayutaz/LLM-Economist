@@ -1,8 +1,8 @@
 """
-Integration tests for advanced usage scenarios.
+高度な使用シナリオの結合テスト。
 
-These tests run actual simulations with real API calls to validate
-the complete LLM Economist functionality.
+実際のAPIコールを使用してシミュレーションを実行し、
+LLM Economistの完全な機能を検証するテスト。
 """
 
 import pytest
@@ -11,10 +11,10 @@ from unittest.mock import patch
 
 
 class TestAdvancedUsageIntegration:
-    """Integration tests for advanced usage scenarios."""
-    
+    """高度な使用シナリオの結合テスト。"""
+
     def test_advanced_usage_imports(self):
-        """Test that advanced usage functions can be imported."""
+        """高度な使用例の関数がインポートできることを確認するテスト。"""
         from examples.advanced_usage import (
             test_rational_openai,
             test_openrouter_rational,
@@ -27,7 +27,7 @@ class TestAdvancedUsageIntegration:
             main
         )
         
-        # Verify they're callable
+        # 呼び出し可能であることを検証
         assert callable(test_rational_openai)
         assert callable(test_openrouter_rational)
         assert callable(test_vllm_rational)
@@ -38,118 +38,118 @@ class TestAdvancedUsageIntegration:
         assert callable(test_fixed_workers)
         assert callable(main)
     
-    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key not available")
+    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI APIキーが利用不可")
     def test_rational_openai_simulation(self):
-        """Test rational scenario with OpenAI (requires API key)."""
+        """OpenAIを使用した合理的シナリオのテスト（APIキーが必要）。"""
         from examples.advanced_usage import test_rational_openai
         
-        # This should run without errors if API key is available
+        # APIキーが利用可能であればエラーなしで実行されるはず
         try:
             test_rational_openai()
         except Exception as e:
-            # Allow for API rate limits or temporary failures
+            # APIレート制限や一時的な障害を許容
             if "rate limit" in str(e).lower() or "quota" in str(e).lower():
                 pytest.skip(f"API rate limit or quota exceeded: {e}")
             else:
                 raise
     
-    @pytest.mark.skipif(not os.getenv("OPENROUTER_API_KEY"), reason="OpenRouter API key not available")
+    @pytest.mark.skipif(not os.getenv("OPENROUTER_API_KEY"), reason="OpenRouter APIキーが利用不可")
     def test_rational_openrouter_simulation(self):
-        """Test rational scenario with OpenRouter (requires API key)."""
+        """OpenRouterを使用した合理的シナリオのテスト（APIキーが必要）。"""
         from examples.advanced_usage import test_openrouter_rational
         
-        # This should run without errors if API key is available
+        # APIキーが利用可能であればエラーなしで実行されるはず
         try:
             test_openrouter_rational()
         except Exception as e:
-            # Allow for API rate limits or temporary failures
+            # APIレート制限や一時的な障害を許容
             if "rate limit" in str(e).lower() or "quota" in str(e).lower():
                 pytest.skip(f"API rate limit or quota exceeded: {e}")
             else:
                 raise
     
-    @pytest.mark.skipif(not os.getenv("GEMINI_API_KEY"), reason="Gemini API key not available")
+    @pytest.mark.skipif(not os.getenv("GEMINI_API_KEY"), reason="Gemini APIキーが利用不可")
     def test_rational_gemini_simulation(self):
-        """Test rational scenario with Gemini (requires API key)."""
+        """Geminiを使用した合理的シナリオのテスト（APIキーが必要）。"""
         from examples.advanced_usage import test_gemini_rational
         
-        # This should run without errors if API key is available
+        # APIキーが利用可能であればエラーなしで実行されるはず
         try:
             test_gemini_rational()
         except Exception as e:
-            # Allow for API rate limits or temporary failures
+            # APIレート制限や一時的な障害を許容
             if "rate limit" in str(e).lower() or "quota" in str(e).lower():
                 pytest.skip(f"API rate limit or quota exceeded: {e}")
             else:
                 raise
     
-    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key not available")
+    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI APIキーが利用不可")
     def test_bounded_rationality_simulation(self):
-        """Test bounded rationality scenario (requires API key)."""
+        """限定合理性シナリオのテスト（APIキーが必要）。"""
         from examples.advanced_usage import test_bounded_rationality
         
-        # This should run without errors if API key is available
+        # APIキーが利用可能であればエラーなしで実行されるはず
         try:
             test_bounded_rationality()
         except Exception as e:
-            # Allow for API rate limits or temporary failures
+            # APIレート制限や一時的な障害を許容
             if "rate limit" in str(e).lower() or "quota" in str(e).lower():
                 pytest.skip(f"API rate limit or quota exceeded: {e}")
             else:
                 raise
     
-    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key not available")
+    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI APIキーが利用不可")
     def test_democratic_scenario_simulation(self):
-        """Test democratic scenario (requires API key)."""
+        """民主的シナリオのテスト（APIキーが必要）。"""
         from examples.advanced_usage import test_democratic_scenario
         
-        # This should run without errors if API key is available
+        # APIキーが利用可能であればエラーなしで実行されるはず
         try:
             test_democratic_scenario()
         except Exception as e:
-            # Allow for API rate limits or temporary failures
+            # APIレート制限や一時的な障害を許容
             if "rate limit" in str(e).lower() or "quota" in str(e).lower():
                 pytest.skip(f"API rate limit or quota exceeded: {e}")
             else:
                 raise
     
     def test_fixed_workers_simulation(self):
-        """Test fixed workers scenario (no API key required)."""
+        """固定ワーカーシナリオのテスト（APIキー不要）。"""
         from examples.advanced_usage import test_fixed_workers
         
-        # This should always work as it uses fixed agents
+        # 固定エージェントを使用するため常に動作するはず
         test_fixed_workers()
     
     def test_vllm_simulation_requires_server(self):
-        """Test that vLLM scenario properly handles server connection."""
+        """vLLMシナリオがサーバー接続を適切に処理することを確認するテスト。"""
         from examples.advanced_usage import test_vllm_rational
         
-        # This should fail gracefully if no vLLM server is running
+        # vLLMサーバーが起動していない場合は適切に失敗するはず
         with pytest.raises(Exception) as exc_info:
             test_vllm_rational()
         
-        # Should get connection error, not other types of errors
-        assert any(keyword in str(exc_info.value).lower() for keyword in 
+        # 接続エラーが発生するはず（他の種類のエラーではない）
+        assert any(keyword in str(exc_info.value).lower() for keyword in
                   ["connection", "refused", "unreachable", "timeout"])
-    
+
     def test_ollama_simulation_requires_server(self):
-        """Test that Ollama scenario properly handles server connection."""
+        """Ollamaシナリオがサーバー接続を適切に処理することを確認するテスト。"""
         from examples.advanced_usage import test_ollama_rational
         
-        # This should fail gracefully if no Ollama server is running
+        # Ollamaサーバーが起動していない場合は適切に失敗するはず
         with pytest.raises(Exception) as exc_info:
             test_ollama_rational()
         
-        # Should get connection error, not other types of errors
-        assert any(keyword in str(exc_info.value).lower() for keyword in 
+        # 接続エラーが発生するはず（他の種類のエラーではない）
+        assert any(keyword in str(exc_info.value).lower() for keyword in
                   ["connection", "refused", "unreachable", "timeout"])
 
 
 class TestAdvancedUsageCommandLine:
-    """Test command line interface for advanced usage."""
+    """高度な使用例のコマンドラインインターフェースのテスト。"""
     
     def test_help_command(self):
-        """Test that help command works."""
+        """ヘルプコマンドが動作することを確認するテスト。"""
         import subprocess
         import sys
         
@@ -162,7 +162,7 @@ class TestAdvancedUsageCommandLine:
         assert "scenarios" in result.stdout.lower() or "commands" in result.stdout.lower()
     
     def test_invalid_scenario(self):
-        """Test that invalid scenario is handled properly."""
+        """無効なシナリオが適切に処理されることを確認するテスト。"""
         import subprocess
         import sys
         
@@ -174,7 +174,7 @@ class TestAdvancedUsageCommandLine:
         assert "invalid scenario" in result.stderr.lower() or "unknown command" in result.stdout.lower()
     
     def test_list_scenarios(self):
-        """Test that all scenarios are listed in help."""
+        """全シナリオがヘルプに表示されることを確認するテスト。"""
         import subprocess
         import sys
         
@@ -192,10 +192,10 @@ class TestAdvancedUsageCommandLine:
 
 
 class TestAdvancedUsageConfiguration:
-    """Test configuration and setup for advanced usage scenarios."""
+    """高度な使用シナリオの設定とセットアップのテスト。"""
     
     def test_all_scenarios_have_20_timesteps(self):
-        """Test that all scenarios are configured for 20 timesteps."""
+        """全シナリオが20タイムステップで設定されていることを確認するテスト。"""
         from examples.advanced_usage import (
             test_rational_openai,
             test_openrouter_rational,
@@ -207,7 +207,7 @@ class TestAdvancedUsageConfiguration:
             test_fixed_workers
         )
         
-        # Use reflection to check Args classes in each function
+        # リフレクションを使用して各関数のArgsクラスを確認
         import inspect
         
         functions = [
@@ -223,11 +223,11 @@ class TestAdvancedUsageConfiguration:
         
         for func in functions:
             source = inspect.getsource(func)
-            # Check that max_timesteps = 20 is in the source
+            # ソースコードにmax_timesteps = 20が含まれていることを確認
             assert "max_timesteps = 20" in source, f"Function {func.__name__} doesn't have max_timesteps = 20"
     
     def test_scenario_diversity(self):
-        """Test that different scenarios have different configurations."""
+        """異なるシナリオが異なる設定を持つことを確認するテスト。"""
         from examples.advanced_usage import (
             test_rational_openai,
             test_bounded_rationality,
@@ -235,8 +235,8 @@ class TestAdvancedUsageConfiguration:
             test_fixed_workers
         )
         
-        # Check that different scenarios have different configurations
-        # This is a basic sanity check
+        # 異なるシナリオが異なる設定を持つことを確認
+        # 基本的な健全性チェック
         import inspect
         
         rational_source = inspect.getsource(test_rational_openai)
@@ -244,15 +244,15 @@ class TestAdvancedUsageConfiguration:
         democratic_source = inspect.getsource(test_democratic_scenario)
         fixed_source = inspect.getsource(test_fixed_workers)
         
-        # Rational should have scenario = "rational"
+        # Rationalはscenario = "rational"を持つはず
         assert 'scenario = "rational"' in rational_source
         
-        # Bounded should have scenario = "bounded"
+        # Boundedはscenario = "bounded"を持つはず
         assert 'scenario = "bounded"' in bounded_source
         
-        # Democratic should have scenario = "democratic"
+        # Democraticはscenario = "democratic"を持つはず
         assert 'scenario = "democratic"' in democratic_source
         
-        # Fixed should have worker_type = "FIXED"
+        # Fixedはworker_type = "FIXED"を持つはず
         assert 'worker_type = "FIXED"' in fixed_source
         assert 'planner_type = "FIXED"' in fixed_source 

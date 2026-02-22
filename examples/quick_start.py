@@ -1,8 +1,8 @@
 """
-Quick start examples for the LLM Economist framework.
+LLM Economistフレームワークのクイックスタートサンプル。
 
-This module provides basic functionality tests and setup validation.
-For actual simulation examples, see advanced_usage.py.
+このモジュールは基本的な機能テストとセットアップの検証を提供します。
+実際のシミュレーション例については、advanced_usage.pyを参照してください。
 """
 
 import os
@@ -11,8 +11,8 @@ from llm_economist.main import run_simulation, create_argument_parser, generate_
 
 
 def test_imports():
-    """Test that all required modules can be imported."""
-    print("Testing imports...")
+    """必要な全モジュールがインポートできることをテストする。"""
+    print("インポートをテスト中...")
     
     try:
         from llm_economist.main import run_simulation, create_argument_parser
@@ -21,20 +21,20 @@ def test_imports():
         from llm_economist.agents.llm_agent import TestAgent
         from llm_economist.utils.common import distribute_agents
         from llm_economist.agents.worker import distribute_personas
-        print("✓ All imports successful")
+        print("✓ 全てのインポートに成功しました")
         return True
     except ImportError as e:
-        print(f"✗ Import error: {e}")
+        print(f"✗ インポートエラー: {e}")
         return False
 
 
 def test_argument_parser():
-    """Test that argument parser works correctly."""
-    print("Testing argument parser...")
+    """引数パーサーが正しく動作することをテストする。"""
+    print("引数パーサーをテスト中...")
     
     try:
         parser = create_argument_parser()
-        # Test with minimal arguments
+        # 最小限の引数でテスト
         args = parser.parse_args([
             "--scenario", "rational",
             "--num-agents", "3",
@@ -51,16 +51,16 @@ def test_argument_parser():
         assert args.planner_type == "LLM"
         assert args.llm == "gpt-4o-mini"
         
-        print("✓ Argument parser working correctly")
+        print("✓ 引数パーサーは正常に動作しています")
         return True
     except Exception as e:
-        print(f"✗ Argument parser error: {e}")
+        print(f"✗ 引数パーサーエラー: {e}")
         return False
 
 
 def test_experiment_name_generation():
-    """Test experiment name generation."""
-    print("Testing experiment name generation...")
+    """実験名の生成をテストする。"""
+    print("実験名の生成をテスト中...")
     
     try:
         class Args:
@@ -82,21 +82,21 @@ def test_experiment_name_generation():
         args = Args()
         name = generate_experiment_name(args)
         
-        # Check that name contains expected components
+        # 名前に期待されるコンポーネントが含まれているか確認
         expected_parts = ["rational", "a5", "w-LLM", "p-LLM", "llm-g"]
         for part in expected_parts:
             assert part in name, f"Expected '{part}' in experiment name '{name}'"
         
-        print(f"✓ Experiment name generation working: {name}")
+        print(f"✓ 実験名の生成が正常に動作: {name}")
         return True
     except Exception as e:
-        print(f"✗ Experiment name generation error: {e}")
+        print(f"✗ 実験名の生成エラー: {e}")
         return False
 
 
 def test_api_key_detection():
-    """Test API key detection for different services."""
-    print("Testing API key detection...")
+    """各サービスのAPIキー検出をテストする。"""
+    print("APIキーの検出をテスト中...")
     
     api_keys = {
         "OpenAI": os.getenv('OPENAI_API_KEY') or os.getenv('ECON_OPENAI'),
@@ -108,21 +108,21 @@ def test_api_key_detection():
     for service, key in api_keys.items():
         if key:
             found_keys.append(service)
-            print(f"✓ {service} API key found")
+            print(f"✓ {service} APIキーが見つかりました")
         else:
-            print(f"- {service} API key not found")
-    
+            print(f"- {service} APIキーが見つかりません")
+
     if found_keys:
-        print(f"✓ Found API keys for: {', '.join(found_keys)}")
+        print(f"✓ APIキーが見つかりました: {', '.join(found_keys)}")
         return True
     else:
-        print("- No API keys found (this is okay for testing)")
+        print("- APIキーが見つかりません（テスト用途では問題ありません）")
         return True
 
 
 def test_basic_args_creation():
-    """Test creating basic argument objects."""
-    print("Testing basic Args object creation...")
+    """基本的な引数オブジェクトの作成をテストする。"""
+    print("基本的なArgsオブジェクトの作成をテスト中...")
     
     try:
         class Args:
@@ -157,7 +157,7 @@ def test_basic_args_creation():
         
         args = Args()
         
-        # Verify all required attributes exist
+        # 全ての必須属性が存在することを検証
         required_attrs = [
             'scenario', 'num_agents', 'max_timesteps', 'worker_type', 
             'planner_type', 'llm', 'agent_mix', 'bracket_setting',
@@ -167,16 +167,16 @@ def test_basic_args_creation():
         for attr in required_attrs:
             assert hasattr(args, attr), f"Missing required attribute: {attr}"
         
-        print("✓ Basic Args object creation successful")
+        print("✓ 基本的なArgsオブジェクトの作成に成功しました")
         return True
     except Exception as e:
-        print(f"✗ Args object creation error: {e}")
+        print(f"✗ Argsオブジェクトの作成エラー: {e}")
         return False
 
 
 def test_service_configurations():
-    """Test different service configurations."""
-    print("Testing service configurations...")
+    """異なるサービス設定をテストする。"""
+    print("サービス設定をテスト中...")
     
     configurations = [
         {"service": "vllm", "port": 8000, "use_openrouter": False},
@@ -217,19 +217,19 @@ def test_service_configurations():
                 seed = 42
             
             args = Args()
-            print(f"✓ Configuration valid: {config['service']} on port {config['port']}")
+            print(f"✓ 設定が有効: {config['service']} ポート {config['port']}")
         except Exception as e:
-            print(f"✗ Configuration error for {config}: {e}")
+            print(f"✗ 設定エラー ({config}): {e}")
             return False
-    
-    print("✓ All service configurations valid")
+
+    print("✓ 全てのサービス設定が有効です")
     return True
 
 
 def run_all_tests():
-    """Run all basic functionality tests."""
+    """全ての基本機能テストを実行する。"""
     print("="*50)
-    print("Running LLM Economist Quick Start Tests")
+    print("LLM Economistクイックスタートテストを実行中")
     print("="*50)
     
     tests = [
@@ -252,30 +252,30 @@ def run_all_tests():
             else:
                 failed += 1
         except Exception as e:
-            print(f"✗ Test failed with exception: {e}")
+            print(f"✗ テストが例外で失敗: {e}")
             failed += 1
-    
+
     print("\n" + "="*50)
-    print(f"Test Results: {passed} passed, {failed} failed")
+    print(f"テスト結果: {passed} 成功, {failed} 失敗")
     print("="*50)
-    
+
     if failed == 0:
-        print("🎉 All basic functionality tests passed!")
-        print("For actual simulation examples, run: python examples/advanced_usage.py")
+        print("全ての基本機能テストに合格しました!")
+        print("実際のシミュレーション例を実行するには: python examples/advanced_usage.py")
     else:
-        print("❌ Some tests failed. Please check the errors above.")
+        print("一部のテストが失敗しました。上記のエラーを確認してください。")
     
     return failed == 0
 
 
 def main():
-    """Main entry point for quick start tests."""
+    """クイックスタートテストのメインエントリポイント。"""
     if len(sys.argv) > 1 and sys.argv[1] == "--help":
         print(__doc__)
-        print("\nUsage:")
-        print("  python examples/quick_start.py          # Run all basic tests")
-        print("  python examples/quick_start.py --help   # Show this help")
-        print("\nFor actual simulation examples:")
+        print("\n使い方:")
+        print("  python examples/quick_start.py          # 全ての基本テストを実行")
+        print("  python examples/quick_start.py --help   # このヘルプを表示")
+        print("\n実際のシミュレーション例:")
         print("  python examples/advanced_usage.py --help")
         return
     

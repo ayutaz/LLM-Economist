@@ -1,5 +1,5 @@
 """
-Tests for LLM model implementations.
+LLMモデル実装のテスト。
 """
 
 import pytest
@@ -13,57 +13,57 @@ from llm_economist.models.gemini_model import GeminiModel
 
 
 class TestBaseLLMModel:
-    """Test the base LLM model class."""
+    """ベースLLMモデルクラスのテスト。"""
     
     def test_base_model_abstract(self):
-        """Test that BaseLLMModel cannot be instantiated directly."""
+        """BaseLLMModelが直接インスタンス化できないことを確認するテスト。"""
         with pytest.raises(TypeError):
             BaseLLMModel("test-model")
     
     def test_json_extraction(self):
-        """Test JSON extraction functionality."""
+        """JSON抽出機能のテスト。"""
         class TestModel(BaseLLMModel):
             def send_msg(self, system_prompt, user_prompt, temperature=None, json_format=False):
                 return "test", False
         
         model = TestModel("test-model")
         
-        # Test valid JSON
+        # 有効なJSONのテスト
         valid_json = '{"key": "value", "number": 42}'
         result, is_valid = model._extract_json(f"Some text {valid_json} more text")
         assert is_valid
         assert result == valid_json
         
-        # Test invalid JSON
+        # 無効なJSONのテスト
         invalid_json = '{"key": "value"'
         result, is_valid = model._extract_json(f"Some text {invalid_json} more text")
         assert not is_valid
         
-        # Test no JSON
+        # JSONなしのテスト
         no_json = "This is just regular text"
         result, is_valid = model._extract_json(no_json)
         assert not is_valid
 
 
 class TestOpenAIModel:
-    """Test OpenAI model implementation."""
+    """OpenAIモデル実装のテスト。"""
     
     def test_init_with_api_key(self):
-        """Test initialization with API key."""
+        """APIキーありでの初期化テスト。"""
         with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
             model = OpenAIModel()
             assert model.model_name == "gpt-4o-mini"
-    
+
     def test_init_without_api_key(self):
-        """Test initialization without API key raises error."""
+        """APIキーなしでの初期化がエラーを発生させることを確認するテスト。"""
         with patch.dict(os.environ, {}, clear=True):
             with pytest.raises(ValueError, match="OpenAI API key not found"):
                 OpenAIModel()
     
     @patch('llm_economist.models.openai_model.OpenAI')
     def test_send_msg_success(self, mock_openai):
-        """Test successful message sending."""
-        # Mock the OpenAI client response
+        """メッセージ送信成功のテスト。"""
+        # OpenAIクライアントのレスポンスをモック
         mock_response = Mock()
         mock_response.choices = [Mock()]
         mock_response.choices[0].message.content = "Test response"
@@ -81,78 +81,78 @@ class TestOpenAIModel:
             mock_client.chat.completions.create.assert_called_once()
     
     def test_get_available_models(self):
-        """Test getting available models."""
+        """利用可能なモデル一覧の取得テスト。"""
         models = OpenAIModel.get_available_models()
         assert isinstance(models, list)
         assert "gpt-4o-mini" in models
 
 
 class TestVLLMModel:
-    """Test vLLM model implementation."""
+    """vLLMモデル実装のテスト。"""
     
     @patch('llm_economist.models.vllm_model.OpenAI')
     def test_init(self, mock_openai):
-        """Test vLLM model initialization."""
+        """vLLMモデル初期化のテスト。"""
         model = VLLMModel()
         assert model.model_name == "meta-llama/Llama-3.1-8B-Instruct"
         assert model.base_url == "http://localhost:8000"
     
     def test_model_mapping(self):
-        """Test model name mapping."""
+        """モデル名マッピングのテスト。"""
         with patch('llm_economist.models.vllm_model.OpenAI'):
             model = VLLMModel(model_name="llama3:8b")
             assert model.model_name == "meta-llama/Llama-3.1-8B-Instruct"
     
     @patch('llm_economist.models.vllm_model.requests.get')
     def test_health_check(self, mock_get):
-        """Test health check functionality."""
+        """ヘルスチェック機能のテスト。"""
         with patch('llm_economist.models.vllm_model.OpenAI'):
             model = VLLMModel()
             
-            # Test healthy server
+            # 正常なサーバーのテスト
             mock_get.return_value.status_code = 200
             assert model.check_health()
             
-            # Test unhealthy server
+            # 異常なサーバーのテスト
             mock_get.side_effect = Exception("Connection error")
             assert not model.check_health()
 
 
 class TestOllamaModel:
-    """Test Ollama model implementation."""
-    
+    """Ollamaモデル実装のテスト。"""
+
     def test_init_missing_ollama(self):
-        """Test initialization when ollama package is missing."""
+        """ollamaパッケージが未インストールの場合の初期化テスト。"""
         with patch('builtins.__import__', side_effect=ImportError):
             with pytest.raises(ImportError, match="Please install ollama"):
                 OllamaModel()
 
 
 class TestOpenRouterModel:
-    """Test OpenRouter model implementation."""
-    
+    """OpenRouterモデル実装のテスト。"""
+
     def test_init_with_api_key(self):
-        """Test initialization with API key."""
+        """APIキーありでの初期化テスト。"""
         with patch.dict(os.environ, {"OPENROUTER_API_KEY": "test-key"}):
             model = OpenRouterModel()
             assert model.api_key == "test-key"
-    
+
     def test_init_without_api_key(self):
-        """Test initialization without API key raises error."""
+        """APIキーなしでの初期化がエラーを発生させることを確認するテスト。"""
         with patch.dict(os.environ, {}, clear=True):
             with pytest.raises(ValueError, match="OpenRouter API key not found"):
                 OpenRouterModel()
     
     def test_get_popular_models(self):
-        """Test getting popular models."""
+        """人気モデル一覧の取得テスト。"""
         models = OpenRouterModel.get_popular_models()
         assert isinstance(models, list)
         assert "meta-llama/llama-3.1-8b-instruct" in models
     
     @patch('llm_economist.models.openrouter_model.requests.post')
     def test_send_msg_success(self, mock_post):
-        """Test successful message sending."""
-        # Mock successful response
+        """メッセージ送信成功のテスト。"""
+        # 成功レスポンスをモック
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
@@ -169,34 +169,34 @@ class TestOpenRouterModel:
 
 
 class TestGeminiModel:
-    """Test Gemini model implementation."""
-    
+    """Geminiモデル実装のテスト。"""
+
     def test_init_without_api_key(self):
-        """Test initialization without API key raises error."""
+        """APIキーなしでの初期化がエラーを発生させることを確認するテスト。"""
         with patch.dict(os.environ, {}, clear=True):
             with pytest.raises(ValueError, match="Google API key not found"):
                 GeminiModel()
     
     def test_init_missing_google_ai(self):
-        """Test initialization when google.generativeai package is missing."""
+        """google.generativeaiパッケージが未インストールの場合の初期化テスト。"""
         with patch.dict(os.environ, {"GOOGLE_API_KEY": "test-key"}):
             with patch('builtins.__import__', side_effect=ImportError):
                 with pytest.raises(ImportError, match="Please install Google AI SDK"):
                     GeminiModel()
     
     def test_get_available_models(self):
-        """Test getting available models."""
+        """利用可能なモデル一覧の取得テスト。"""
         models = GeminiModel.get_available_models()
         assert isinstance(models, list)
         assert "gemini-1.5-flash" in models
 
 
 class TestModelIntegration:
-    """Integration tests for model switching."""
-    
+    """モデル切り替えの結合テスト。"""
+
     def test_model_factory_pattern(self):
-        """Test that models can be created through a factory pattern."""
-        # This simulates how the LLMAgent creates models
+        """ファクトリパターンによるモデル生成のテスト。"""
+        # LLMAgentがモデルを生成する方法をシミュレート
         
         def create_model(model_type, **kwargs):
             if "gpt" in model_type.lower():
@@ -216,23 +216,23 @@ class TestModelIntegration:
         assert create_model("gemini-1.5-flash") == "Gemini"
 
 
-# Fixtures for testing
+# テスト用フィクスチャ
 @pytest.fixture
 def mock_openai_env():
-    """Fixture that provides OpenAI API key in environment."""
+    """環境変数にOpenAI APIキーを設定するフィクスチャ。"""
     with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
         yield
 
 
 @pytest.fixture
 def mock_openrouter_env():
-    """Fixture that provides OpenRouter API key in environment."""
+    """環境変数にOpenRouter APIキーを設定するフィクスチャ。"""
     with patch.dict(os.environ, {"OPENROUTER_API_KEY": "test-key"}):
         yield
 
 
 @pytest.fixture
 def mock_google_env():
-    """Fixture that provides Google API key in environment."""
+    """環境変数にGoogle APIキーを設定するフィクスチャ。"""
     with patch.dict(os.environ, {"GOOGLE_API_KEY": "test-key"}):
         yield 

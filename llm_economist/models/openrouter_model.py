@@ -1,5 +1,5 @@
 """
-OpenRouter model implementation for the LLM Economist framework.
+LLM EconomistフレームワークのOpenRouterモデル実装。
 """
 
 from typing import Tuple, Optional
@@ -11,33 +11,33 @@ from .base import BaseLLMModel
 
 
 class OpenRouterModel(BaseLLMModel):
-    """OpenRouter model implementation for accessing multiple models through OpenRouter API."""
-    
-    def __init__(self, model_name: str = "meta-llama/llama-3.1-8b-instruct", 
+    """OpenRouter APIを通じて複数のモデルにアクセスするOpenRouterモデル実装。"""
+
+    def __init__(self, model_name: str = "meta-llama/llama-3.1-8b-instruct",
                  api_key: Optional[str] = None,
                  max_tokens: int = 1000, temperature: float = 0.7):
         """
-        Initialize the OpenRouter model.
-        
+        OpenRouterモデルを初期化する。
+
         Args:
-            model_name: Name of the model to use on OpenRouter
-            api_key: OpenRouter API key (if None, will look for OPENROUTER_API_KEY env var)
-            max_tokens: Maximum number of tokens to generate
-            temperature: Temperature for sampling
+            model_name: OpenRouterで使用するモデル名
+            api_key: OpenRouter APIキー (Noneの場合、OPENROUTER_API_KEY環境変数を参照)
+            max_tokens: 生成する最大トークン数
+            temperature: サンプリングの温度パラメータ
         """
         super().__init__(model_name, max_tokens, temperature)
         
-        # Get API key from parameter or environment
+        # パラメータまたは環境変数からAPIキーを取得
         if api_key is None:
             api_key = os.getenv('OPENROUTER_API_KEY')
-        
+
         if not api_key:
-            raise ValueError("OpenRouter API key not found. Set OPENROUTER_API_KEY environment variable or pass api_key parameter.")
+            raise ValueError("OpenRouter APIキーが見つかりません。OPENROUTER_API_KEY環境変数を設定するか、api_keyパラメータを渡してください。")
         
         self.api_key = api_key
         self.base_url = "https://openrouter.ai/api/v1"
         
-        # Headers for OpenRouter API
+        # OpenRouter APIのヘッダー
         self.headers = {
             "Authorization": f"Bearer {api_key}",
             "HTTP-Referer": "https://github.com/sethkarten/LLMEconomist",
@@ -45,20 +45,20 @@ class OpenRouterModel(BaseLLMModel):
             "Content-Type": "application/json"
         }
         
-    def send_msg(self, system_prompt: str, user_prompt: str, 
-                 temperature: Optional[float] = None, 
+    def send_msg(self, system_prompt: str, user_prompt: str,
+                 temperature: Optional[float] = None,
                  json_format: bool = False) -> Tuple[str, bool]:
         """
-        Send a message to the OpenRouter API and get a response.
-        
+        OpenRouter APIにメッセージを送信してレスポンスを取得する。
+
         Args:
-            system_prompt: System prompt to set the context
-            user_prompt: User prompt/question
-            temperature: Temperature override for this call
-            json_format: Whether to request JSON format response
-            
+            system_prompt: コンテキストを設定するシステムプロンプト
+            user_prompt: ユーザーのプロンプト/質問
+            temperature: この呼び出しの温度オーバーライド
+            json_format: JSONフォーマットのレスポンスを要求するかどうか
+
         Returns:
-            Tuple of (response_text, is_json_valid)
+            (レスポンステキスト, JSONが有効か) のタプル
         """
         if temperature is None:
             temperature = self.temperature
@@ -68,7 +68,7 @@ class OpenRouterModel(BaseLLMModel):
         
         while retry_count < max_retries:
             try:
-                # Prepare the request payload
+                # リクエストペイロードの準備
                 payload = {
                     "model": self.model_name,
                     "messages": [
@@ -79,11 +79,11 @@ class OpenRouterModel(BaseLLMModel):
                     "max_tokens": self.max_tokens
                 }
                 
-                # Add JSON format if requested (for compatible models)
+                # 要求された場合JSONフォーマットを追加 (互換性のあるモデル用)
                 if json_format:
                     payload["response_format"] = {"type": "json_object"}
                 
-                # Make the API call
+                # API呼び出しの実行
                 response = requests.post(
                     f"{self.base_url}/chat/completions",
                     headers=self.headers,
@@ -95,48 +95,48 @@ class OpenRouterModel(BaseLLMModel):
                 result = response.json()
                 
                 if 'choices' not in result or len(result['choices']) == 0:
-                    raise Exception(f"No response choices returned: {result}")
+                    raise Exception(f"レスポンスの選択肢が返されませんでした: {result}")
                 
                 message = result['choices'][0]['message']['content']
                 
                 if not self._validate_response(message):
-                    self.logger.warning(f"Invalid response received: {message}")
+                    self.logger.warning(f"無効なレスポンスを受信: {message}")
                     retry_count += 1
                     continue
-                
-                # Extract JSON if requested
+
+                # 要求された場合JSONを抽出
                 if json_format:
                     return self._extract_json(message)
                 
                 return message, False
                 
             except requests.exceptions.HTTPError as e:
-                if e.response.status_code == 429:  # Rate limit
-                    self.logger.warning(f"Rate limit hit: {e}")
+                if e.response.status_code == 429:  # レート制限
+                    self.logger.warning(f"レート制限に到達: {e}")
                     self._handle_rate_limit(retry_count, max_retries)
                     retry_count += 1
                 else:
-                    self.logger.error(f"HTTP error calling OpenRouter API: {e}")
+                    self.logger.error(f"OpenRouter API HTTPエラー: {e}")
                     raise
-                    
+
             except requests.exceptions.RequestException as e:
-                self.logger.error(f"Request error calling OpenRouter API: {e}")
+                self.logger.error(f"OpenRouter APIリクエストエラー: {e}")
                 retry_count += 1
                 if retry_count >= max_retries:
                     raise
                 sleep(1)
                 
             except Exception as e:
-                self.logger.error(f"Error calling OpenRouter API: {e}")
+                self.logger.error(f"OpenRouter API呼び出しエラー: {e}")
                 retry_count += 1
                 if retry_count >= max_retries:
                     raise
                 sleep(1)
         
-        raise Exception(f"Failed to get response after {max_retries} retries")
-    
+        raise Exception(f"{max_retries}回のリトライ後にレスポンスの取得に失敗しました")
+
     def get_models(self) -> list:
-        """Get list of available models from OpenRouter."""
+        """OpenRouterから利用可能なモデルのリストを取得する。"""
         try:
             response = requests.get(
                 f"{self.base_url}/models",
@@ -146,12 +146,12 @@ class OpenRouterModel(BaseLLMModel):
             response.raise_for_status()
             return response.json()['data']
         except Exception as e:
-            self.logger.error(f"Error getting models: {e}")
+            self.logger.error(f"モデル一覧取得エラー: {e}")
             return []
     
     @classmethod
     def get_popular_models(cls):
-        """Get list of popular models available on OpenRouter."""
+        """OpenRouterで利用可能な代表的なモデルのリストを取得する。"""
         return [
             "meta-llama/llama-3.1-8b-instruct",
             "meta-llama/llama-3.1-70b-instruct",
@@ -170,7 +170,7 @@ class OpenRouterModel(BaseLLMModel):
         ]
     
     def check_model_availability(self, model_name: str) -> bool:
-        """Check if a specific model is available on OpenRouter."""
+        """特定のモデルがOpenRouterで利用可能かどうかを確認する。"""
         try:
             models = self.get_models()
             return any(model['id'] == model_name for model in models)

@@ -1,3 +1,3 @@
 """
-Data files for the LLM Economist framework.
+LLM Economistフレームワークのデータファイル。
 """ 

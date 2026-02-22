@@ -1,3 +1,3 @@
 """
-Experiment scripts for the LLM Economist framework.
+LLM Economist フレームワークの実験スクリプト。
 """ 

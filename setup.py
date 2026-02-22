@@ -1,5 +1,5 @@
 """
-Setup script for LLM Economist package.
+LLM Economist パッケージのセットアップスクリプト。
 """
 
 from setuptools import setup, find_packages
@@ -15,7 +15,7 @@ setup(
     version="1.0.0",
     author="Seth Karten, Wenzhe Li, Zihan Ding, Samuel Kleiner, Yu Bai, Chi Jin",
     author_email="sethkarten@princeton.edu",
-    description="A framework for economic simulations using Large Language Models",
+    description="大規模言語モデルを用いた経済シミュレーションフレームワーク",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/sethkarten/LLMEconomist",
@@ -43,7 +43,7 @@ setup(
             "flake8>=4.0.0",
             "isort>=5.0.0",
         ],
-        "flash-attn": ["flash-attn>=2.0.0"],  # Uncomment if needed for vLLM performance
+        "flash-attn": ["flash-attn>=2.0.0"],  # vLLMのパフォーマンス向上が必要な場合はコメントを解除
     },
     entry_points={
         "console_scripts": [
