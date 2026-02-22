@@ -35,33 +35,18 @@ LLM Economist フレームワークは、経済システムを二層のマルチ
 
 ## 🛠️ インストール
 
-### Conda 環境の初期化
+### 環境構築
 
 ```bash
-# 環境の作成と有効化
-conda create -n LLMEconomist python=3.11 -y
-conda activate LLMEconomist
-```
-
-### クイックインストール
-
-```bash
-pip install llm-economist
+git clone https://github.com/sethkarten/LLMEconomist.git
+cd LLMEconomist
+uv sync
 ```
 
 ### 開発用インストール
 
 ```bash
-git clone https://github.com/sethkarten/LLMEconomist.git
-cd LLMEconomist
-pip install -e .
-```
-
-### 依存関係
-
-```bash
-# 開発用
-pip install -e .[dev]
+uv sync --dev
 ```
 
 ## 🚦 クイックスタート
@@ -76,23 +61,23 @@ export OPENAI_API_KEY="your_openai_key"
 
 ```bash
 # 合理的エージェントによるシンプルなシミュレーション
-python -m llm_economist.main --scenario rational --num-agents 5 --max-timesteps 500
+uv run python -m llm_economist.main --scenario rational --num-agents 5 --max-timesteps 500
 
 # 限定合理性シミュレーション（注: 現在はペルソナ付きの100%利己的エージェントを使用）
-python -m llm_economist.main --scenario bounded --num-agents 10 --percent-ego 100
+uv run python -m llm_economist.main --scenario bounded --num-agents 10 --percent-ego 100
 
 # 民主的投票シミュレーション
-python -m llm_economist.main --scenario democratic --num-agents 15 --two-timescale 50
+uv run python -m llm_economist.main --scenario democratic --num-agents 15 --two-timescale 50
 ```
 
 ### 3. 異なる LLM モデルを試す
 
 ```bash
 # OpenAI GPT-4o
-python -m llm_economist.main --llm gpt-4o --scenario rational
+uv run python -m llm_economist.main --llm gpt-4o --scenario rational
 
 # OpenAI GPT-4o-mini（コスト効率重視）
-python -m llm_economist.main --llm gpt-4o-mini --scenario rational
+uv run python -m llm_economist.main --llm gpt-4o-mini --scenario rational
 ```
 
 ## 🏗️ プロジェクト構成
@@ -164,27 +149,27 @@ LLMEconomist/
 
 ```bash
 # 全実験
-python experiments/run_experiments.py --experiment all
+uv run python experiments/run_experiments.py --experiment all
 
 # 個別実験
-python experiments/run_experiments.py --experiment rational
-python experiments/run_experiments.py --experiment bounded
-python experiments/run_experiments.py --experiment democratic
-python experiments/run_experiments.py --experiment llm_comparison
-python experiments/run_experiments.py --experiment scalability
+uv run python experiments/run_experiments.py --experiment rational
+uv run python experiments/run_experiments.py --experiment bounded
+uv run python experiments/run_experiments.py --experiment democratic
+uv run python experiments/run_experiments.py --experiment llm_comparison
+uv run python experiments/run_experiments.py --experiment scalability
 ```
 
 ### カスタム実験
 
 ```bash
 # Chain of Thought プロンプティング
-python -m llm_economist.main --prompt-algo cot --llm gpt-4o
+uv run python -m llm_economist.main --prompt-algo cot --llm gpt-4o
 
 # Input-Output プロンプティング（デフォルト）
-python -m llm_economist.main --prompt-algo io --llm gpt-4o-mini
+uv run python -m llm_economist.main --prompt-algo io --llm gpt-4o-mini
 
 # 大規模シミュレーション
-python -m llm_economist.main --num-agents 100 --max-timesteps 2000
+uv run python -m llm_economist.main --num-agents 100 --max-timesteps 2000
 ```
 
 ## 📈 使用例
@@ -197,10 +182,10 @@ python -m llm_economist.main --num-agents 100 --max-timesteps 2000
 
 ```bash
 # 全基本機能のテスト
-python examples/quick_start.py
+uv run python examples/quick_start.py
 
 # 個別の基本テストを実行
-python examples/quick_start.py --help
+uv run python examples/quick_start.py --help
 ```
 
 クイックスタートスクリプトが検証する内容：
@@ -216,16 +201,16 @@ python examples/quick_start.py --help
 
 ```bash
 # 全シミュレーションシナリオの実行
-python examples/advanced_usage.py
+uv run python examples/advanced_usage.py
 
 # 個別シナリオのテスト
-python examples/advanced_usage.py rational          # OpenAI GPT-4o-mini
-python examples/advanced_usage.py bounded           # ペルソナ付き限定合理性
-python examples/advanced_usage.py democratic        # 民主的投票メカニズム
-python examples/advanced_usage.py fixed             # 固定労働者 + LLM プランナー
+uv run python examples/advanced_usage.py rational          # OpenAI GPT-4o-mini
+uv run python examples/advanced_usage.py bounded           # ペルソナ付き限定合理性
+uv run python examples/advanced_usage.py democratic        # 民主的投票メカニズム
+uv run python examples/advanced_usage.py fixed             # 固定労働者 + LLM プランナー
 
 # 利用可能なシナリオの表示
-python examples/advanced_usage.py --help
+uv run python examples/advanced_usage.py --help
 ```
 
 全ての上級使用例は開発中の迅速な検証のため 20 タイムステップで実行されます。
@@ -254,41 +239,41 @@ python examples/advanced_usage.py --help
 
 ```bash
 # 基本機能のテスト（インポート、セットアップ、設定）
-pytest tests/test_quickstart.py -v
+uv run pytest tests/test_quickstart.py -v
 
 # 個別コンポーネントのテスト
-python examples/quick_start.py  # 基本機能の直接検証
+uv run python examples/quick_start.py  # 基本機能の直接検証
 ```
 
 ### 統合テスト
 
 ```bash
 # LLM モデル統合のテスト
-pytest tests/test_models.py -v
+uv run pytest tests/test_models.py -v
 
 # モックを使用したシミュレーションロジックのテスト
-pytest tests/test_simulation.py -v
+uv run pytest tests/test_simulation.py -v
 
 # 上級使用シナリオのテスト（API キーが必要）
-pytest tests/test_advanced_usage.py -v
+uv run pytest tests/test_advanced_usage.py -v
 ```
 
 ### エンドツーエンドテスト
 
 ```bash
 # 実際の API を使用したシミュレーションのテスト
-python examples/advanced_usage.py           # 全シナリオ
-python examples/advanced_usage.py rational  # 個別シナリオ
+uv run python examples/advanced_usage.py           # 全シナリオ
+uv run python examples/advanced_usage.py rational  # 個別シナリオ
 ```
 
 ### フルテストスイート
 
 ```bash
 # 全テストの実行
-pytest -v
+uv run pytest -v
 
 # カバレッジ付きで実行
-pytest --cov=llm_economist --cov-report=html
+uv run pytest --cov=llm_economist --cov-report=html
 ```
 
 ### テスト要件
@@ -319,7 +304,7 @@ LLM Economist 論文の実験を再現するには：
    ```bash
    git clone https://github.com/sethkarten/LLMEconomist.git
    cd LLMEconomist
-   pip install -e .
+   uv sync
    export WANDB_API_KEY="your_wandb_key"  # 実験追跡用
    ```
 
@@ -332,21 +317,19 @@ LLM Economist 論文の実験を再現するには：
 
 ```bash
 # 合理的エージェント
-python experiments/run_experiments.py --experiment rational --wandb
+uv run python experiments/run_experiments.py --experiment rational --wandb
 
 # 限定合理性
-python experiments/run_experiments.py --experiment bounded --wandb
+uv run python experiments/run_experiments.py --experiment bounded --wandb
 
 # 民主的投票
-python experiments/run_experiments.py --experiment democratic --wandb
+uv run python experiments/run_experiments.py --experiment democratic --wandb
 
 # LLM 比較
-python experiments/run_experiments.py --experiment llm_comparison --wandb
+uv run python experiments/run_experiments.py --experiment llm_comparison --wandb
 
 # スケーラビリティ分析
-python experiments/run_experiments.py --experiment scalability --wandb
-
-
+uv run python experiments/run_experiments.py --experiment scalability --wandb
 ```
 
 ## 🚀 上級機能
@@ -382,7 +365,7 @@ class CustomLLMModel(BaseLLMModel):
 Weights & Biases を使用した詳細な実験追跡を有効にできます：
 
 ```bash
-python -m llm_economist.main --wandb --scenario bounded --num-agents 20
+uv run python -m llm_economist.main --wandb --scenario bounded --num-agents 20
 ```
 
 ## 🐛 トラブルシューティング

@@ -10,32 +10,30 @@ LLM Economistは、LLMを経済エージェントとして活用し、税制最�
 
 ```bash
 # 環境構築
-conda create -n LLMEconomist python=3.11 -y
-conda activate LLMEconomist
-pip install -e .          # 開発用インストール
-pip install -e .[dev]     # dev依存含む（pytest, black, flake8, isort）
+uv sync                   # 依存関係インストール
+uv sync --dev             # dev依存含む（pytest, black, flake8, isort）
 
 # テスト
-pytest -v                                    # 全テスト実行
-pytest tests/test_quickstart.py -v           # 基本機能テスト（APIキー不要）
-pytest tests/test_simulation.py -v           # シミュレーションロジック
-pytest tests/test_models.py -v               # LLMモデル統合テスト（APIキー必要）
-pytest tests/test_advanced_usage.py -v       # E2Eテスト（APIキー必要）
-pytest --cov=llm_economist --cov-report=html # カバレッジ付き
+uv run pytest -v                                    # 全テスト実行
+uv run pytest tests/test_quickstart.py -v           # 基本機能テスト（APIキー不要）
+uv run pytest tests/test_simulation.py -v           # シミュレーションロジック
+uv run pytest tests/test_models.py -v               # LLMモデル統合テスト（APIキー必要）
+uv run pytest tests/test_advanced_usage.py -v       # E2Eテスト（APIキー必要）
+uv run pytest --cov=llm_economist --cov-report=html # カバレッジ付き
 
 # シミュレーション実行
-python -m llm_economist.main --scenario rational --num-agents 5 --max-timesteps 500
-python -m llm_economist.main --scenario bounded --num-agents 10 --percent-ego 100
-python -m llm_economist.main --scenario democratic --num-agents 15 --two-timescale 50
+uv run python -m llm_economist.main --scenario rational --num-agents 5 --max-timesteps 500
+uv run python -m llm_economist.main --scenario bounded --num-agents 10 --percent-ego 100
+uv run python -m llm_economist.main --scenario democratic --num-agents 15 --two-timescale 50
 
 # 論文実験の再現
-python experiments/run_experiments.py --experiment all
-python experiments/run_experiments.py --experiment rational
+uv run python experiments/run_experiments.py --experiment all
+uv run python experiments/run_experiments.py --experiment rational
 
 # フォーマット・リント
-black llm_economist/
-isort llm_economist/
-flake8 llm_economist/
+uv run black llm_economist/
+uv run isort llm_economist/
+uv run flake8 llm_economist/
 ```
 
 ## アーキテクチャ

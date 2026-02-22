@@ -1,0 +1,47 @@
+[project]
+name = "llm-economist"
+version = "1.0.0"
+description = "大規模言語モデルを用いた経済シミュレーションフレームワーク"
+authors = [
+    {name = "Seth Karten, Wenzhe Li, Zihan Ding, Samuel Kleiner, Yu Bai, Chi Jin", email = "sethkarten@princeton.edu"}
+]
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dependencies = [
+    "numpy>=2.4.2",
+    "openai>=2.21.0",
+    "pandas>=3.0.1",
+    "scipy>=1.17.0",
+    "torch>=2.10.0",
+    "wandb>=0.25.0",
+]
+
+[project.scripts]
+llm-economist = "llm_economist.main:main"
+
+[project.urls]
+Homepage = "https://github.com/sethkarten/LLMEconomist"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "black>=26.1.0",
+    "flake8>=7.3.0",
+    "isort>=8.0.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+]
