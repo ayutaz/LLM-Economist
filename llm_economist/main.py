@@ -12,6 +12,9 @@ import wandb
 import random
 import numpy as np
 import time
+from dotenv import load_dotenv
+
+load_dotenv()
 from .utils.common import distribute_agents, count_votes, rGB2, GEN_ROLE_MESSAGES
 from .agents.worker import Worker, FixedWorker, distribute_personas
 from .agents.llm_agent import TestAgent
