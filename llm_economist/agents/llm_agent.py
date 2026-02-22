@@ -3,33 +3,29 @@ from time import sleep
 from ..utils.common import Message
 import json
 from ..models.openai_model import OpenAIModel
-from ..models.vllm_model import VLLMModel, OllamaModel
-from ..models.openrouter_model import OpenRouterModel
-from ..models.gemini_model import GeminiModel, GeminiModelViaOpenRouter
 from ..utils.bracket import get_num_brackets, get_default_rates
 from collections import Counter
 import numpy as np
 
 class LLMAgent:
-    def __init__(self, llm_type: str, 
-                 port: int, 
-                 name: str, 
-                 prompt_algo: str='io', 
-                 history_len: int=10, 
-                 timeout: int=10, 
+    def __init__(self, llm_type: str,
+                 name: str,
+                 prompt_algo: str='io',
+                 history_len: int=10,
+                 timeout: int=10,
                  K: int=3,
                  args=None) -> None:
         assert args is not None
-        
+
         self.bracket_setting = args.bracket_setting
         self.num_brackets = get_num_brackets(self.bracket_setting)
         self.tax_rates = get_default_rates(self.bracket_setting)
-        
+
         self.logger = logging.getLogger('main')
         self.name = name
-        
+
         # llm_typeに基づいて適切なモデルを初期化
-        self.llm = self._create_llm_model(llm_type, port, args)
+        self.llm = self._create_llm_model(llm_type)
         
         self.history_len = history_len
         self.timeout = timeout  # 失敗する前のメッセージリトライ回数
@@ -39,25 +35,11 @@ class LLMAgent:
         self.prompt_algo = prompt_algo
         self.K = K  # プロンプトツリーの深さ
 
-    def _create_llm_model(self, llm_type: str, port: int, args):
+    def _create_llm_model(self, llm_type: str):
         """タイプに基づいて適切なLLMモデルを作成する。"""
         if llm_type == 'None':
             return None
-        elif 'gpt' in llm_type.lower():
-            return OpenAIModel(model_name=llm_type)
-        elif 'claude' in llm_type.lower() or 'anthropic' in llm_type.lower():
-            return OpenRouterModel(model_name=llm_type)
-        elif 'gemini' in llm_type.lower():
-            return GeminiModel(model_name=llm_type)
-        elif '/' in llm_type:  # OpenRouterのモデルパスと仮定
-            return OpenRouterModel(model_name=llm_type)
-        elif 'llama' in llm_type.lower() or 'gemma' in llm_type.lower():
-            if args.service == 'ollama':
-                return OllamaModel(model_name=llm_type, base_url=f"http://localhost:{port}")
-            else:
-                return VLLMModel(model_name=llm_type, base_url=f"http://localhost:{port}")
-        else:
-            raise ValueError(f"無効なLLMタイプ: {llm_type}")
+        return OpenAIModel(model_name=llm_type)
 
     def act(self) -> str:
         raise NotImplementedError
@@ -206,17 +188,17 @@ class LLMAgent:
         return (output_tax_rates,)
     
 class TestAgent(LLMAgent):
-    def __init__(self, llm: str, port: int, args):
-        super().__init__(llm, port, name='TestAgent', args=args)
+    def __init__(self, llm: str, args):
+        super().__init__(llm, name='TestAgent', args=args)
         max_retries = 5  # 最大試行回数 (初回を含む)
         initial_delay = 1  # 初期遅延 (秒)
         max_delay = 60  # リトライ間の最大遅延
         current_delay = initial_delay
-        
+
         for attempt in range(max_retries):
             try:
                 self.llm.send_msg('', 'This is a test. Output \"test\" in response.')
-                print(f"{args.service} LLMサービスへの接続に成功しました")
+                print("OpenAI LLMサービスへの接続に成功しました")
                 return  # 成功時に終了
             except Exception as e:
                 if attempt == max_retries - 1:  # 最後の試行が失敗

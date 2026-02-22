@@ -13,8 +13,7 @@
 
 ## 🚀 特徴
 
-- **マルチ LLM 対応**: OpenAI GPT、Google Gemini、Anthropic Claude、Meta Llama など多数のモデルに対応
-- **複数のデプロイ方式**: ローカル（vLLM、Ollama）、クラウド API（OpenAI、OpenRouter）、Google AI
+- **OpenAI API による LLM 統合**: OpenAI GPT モデルを活用した経済シミュレーション
 - **多様な経済シナリオ**: 合理的エージェント、限定合理性、民主的投票メカニズム
 - **リアルなエージェントペルソナ**: 実際の人口統計・職業データに基づく LLM 生成ペルソナ
 - **スケーラブルなアーキテクチャ**: 効率的な並列処理により 3〜1000 以上のエージェントをサポート
@@ -60,15 +59,7 @@ pip install -e .
 
 ### 依存関係
 
-本フレームワークは複数の LLM プロバイダーに対応しています。必要に応じて追加の依存関係をインストールしてください：
-
 ```bash
-# ローカル LLM サーバー用
-pip install vllm ollama
-
-# Google Gemini 用
-pip install google-generativeai
-
 # 開発用
 pip install -e .[dev]
 ```
@@ -77,17 +68,8 @@ pip install -e .[dev]
 
 ### 1. API キーの設定
 
-使用する LLM プロバイダーを選び、対応する API キーを設定してください：
-
 ```bash
-# OpenAI
 export OPENAI_API_KEY="your_openai_key"
-
-# OpenRouter（複数モデル対応）
-export OPENROUTER_API_KEY="your_openrouter_key"
-
-# Google Gemini
-export GOOGLE_API_KEY="your_google_key"
 ```
 
 ### 2. 初めてのシミュレーション実行
@@ -106,17 +88,11 @@ python -m llm_economist.main --scenario democratic --num-agents 15 --two-timesca
 ### 3. 異なる LLM モデルを試す
 
 ```bash
-# OpenAI GPT-4
+# OpenAI GPT-4o
 python -m llm_economist.main --llm gpt-4o --scenario rational
 
-# vLLM 経由のローカル Llama（ローカルサーバーが必要）
-python -m llm_economist.main --llm meta-llama/Llama-3.1-8B-Instruct --service vllm --port 8000
-
-# OpenRouter 経由の Claude
-python -m llm_economist.main --llm anthropic/claude-3.5-sonnet --use-openrouter
-
-# Google Gemini
-python -m llm_economist.main --llm gemini-1.5-flash
+# OpenAI GPT-4o-mini（コスト効率重視）
+python -m llm_economist.main --llm gpt-4o-mini --scenario rational
 ```
 
 ## 🏗️ プロジェクト構成
@@ -130,9 +106,6 @@ LLMEconomist/
 │   │   └── llm_agent.py       # LLM エージェント基底クラス
 │   ├── models/                 # LLM モデル統合
 │   │   ├── openai_model.py    # OpenAI GPT モデル
-│   │   ├── gemini_model.py    # Google Gemini モデル
-│   │   ├── vllm_model.py      # ローカル vLLM/Ollama モデル
-│   │   ├── openrouter_model.py # OpenRouter API
 │   │   └── base.py            # モデル基底インターフェース
 │   ├── utils/                  # ユーティリティ関数
 │   │   ├── common.py          # 共通ユーティリティ
@@ -162,10 +135,8 @@ LLMEconomist/
 
 | パラメータ | 説明 | デフォルト値 | 選択肢 |
 |-----------|------|------------|--------|
-| `--llm` | 使用する LLM モデル | `gpt-4o-mini` | 下記の対応モデルを参照 |
+| `--llm` | 使用する LLM モデル | `gpt-4o-mini` | `gpt-4o`, `gpt-4o-mini` |
 | `--prompt-algo` | プロンプト戦略 | `io` | `io`, `cot` |
-| `--service` | ローカル LLM サービス | `vllm` | `vllm`, `ollama` |
-| `--port` | ローカルサーバーポート | `8000` | 任意の有効なポート |
 
 ### エージェント設定
 
@@ -181,42 +152,9 @@ LLMEconomist/
 
 ## 🤖 対応 LLM モデル
 
-### クラウド API
-
 **OpenAI モデル:**
 - `gpt-4o` - 最高性能、最高コスト
 - `gpt-4o-mini` - 高速かつコスト効率に優れる（推奨）
-
-**OpenRouter 経由（OPENROUTER_API_KEY が必要）:**
-- `meta-llama/llama-3.1-8b-instruct` - オープンソース、良好な性能
-- `meta-llama/llama-3.1-70b-instruct` - より大規模な Llama モデル
-- `anthropic/claude-3.5-sonnet` - 優れた推論能力
-- `google/gemini-flash-1.5` - 高速な Google モデル
-
-**Google Gemini（GOOGLE_API_KEY が必要）:**
-- `gemini-1.5-pro` - 最高性能の Gemini モデル
-- `gemini-1.5-flash` - 高速かつ効率的（推奨）
-
-### ローカルデプロイ
-
-**vLLM（ローカルデプロイ推奨）:**
-```bash
-# vLLM サーバーの起動
-vllm serve meta-llama/Llama-3.1-8B-Instruct --port 8000
-
-# シミュレーションで使用
-python -m llm_economist.main --llm meta-llama/Llama-3.1-8B-Instruct --service vllm --port 8000
-```
-
-**Ollama（簡単なローカルセットアップ）:**
-```bash
-# Ollama のインストールと起動
-ollama pull llama3.1:8b
-ollama serve
-
-# シミュレーションで使用
-python -m llm_economist.main --llm llama3.1:8b --service ollama --port 11434
-```
 
 ## 📊 実験スクリプト
 
@@ -286,12 +224,6 @@ python examples/advanced_usage.py bounded           # ペルソナ付き限定�
 python examples/advanced_usage.py democratic        # 民主的投票メカニズム
 python examples/advanced_usage.py fixed             # 固定労働者 + LLM プランナー
 
-# 異なる LLM プロバイダーのテスト
-python examples/advanced_usage.py openrouter        # OpenRouter API
-python examples/advanced_usage.py vllm              # ローカル vLLM サーバー
-python examples/advanced_usage.py ollama            # ローカル Ollama
-python examples/advanced_usage.py gemini            # Google Gemini
-
 # 利用可能なシナリオの表示
 python examples/advanced_usage.py --help
 ```
@@ -311,7 +243,7 @@ python examples/advanced_usage.py --help
 - **`advanced_usage.py`**: 実際の LLM API を使用したフルシミュレーションテスト
   - 20 タイムステップの経済シミュレーション
   - 全シナリオ: rational, bounded, democratic, fixed workers
-  - 複数の LLM プロバイダー: OpenAI, OpenRouter, vLLM, Ollama, Gemini
+  - OpenAI API による LLM 統合
   - 実践的なテスト（シナリオあたり 2〜10 分）
 
 ## 🧪 テスト
@@ -361,13 +293,9 @@ pytest --cov=llm_economist --cov-report=html
 
 ### テスト要件
 
-- **API キー**: 上級使用テストと統合テストには API キーが必要です：
-  - `OPENAI_API_KEY` または `ECON_OPENAI`（ほとんどのテストに必要）
-  - `OPENROUTER_API_KEY`（オプション、OpenRouter テスト用）
-  - `GOOGLE_API_KEY`（オプション、Gemini テスト用）
+- **API キー**: 上級使用テストと統合テストには `OPENAI_API_KEY` または `ECON_OPENAI` が必要です
 - **実際の統合**: 上級テストはエンドツーエンドの機能を確認するため実際の LLM API を使用します
 - **高速実行**: 全テストは迅速な検証のため 20 タイムステップ以下で実行されます
-- **ローカルサーバー**: vLLM と Ollama のテストにはローカルサーバーの起動が必要です（利用不可の場合はスキップされます）
 
 ## 🎭 エージェントペルソナ
 
@@ -395,17 +323,9 @@ LLM Economist 論文の実験を再現するには：
    export WANDB_API_KEY="your_wandb_key"  # 実験追跡用
    ```
 
-2. **LLM セットアップ（いずれかを選択）:**
-
-   **オプション A: OpenAI（最も簡単）:**
+2. **LLM セットアップ:**
    ```bash
    export OPENAI_API_KEY="your_key"
-   ```
-
-   **オプション B: ローカル vLLM（最もコスト効率が良い）:**
-   ```bash
-   # Llama 3.1 8B で vLLM サーバーを起動
-   vllm serve meta-llama/Llama-3.1-8B-Instruct --tensor-parallel-size 1 --port 8000
    ```
 
 ### メイン実験
@@ -446,7 +366,7 @@ class CustomWorker(Worker):
 
 ### カスタム LLM モデル
 
-新しい LLM プロバイダーのサポートを追加できます：
+`BaseLLMModel` を継承してカスタムモデルを実装できます：
 
 ```python
 from llm_economist.models.base import BaseLLMModel
@@ -473,17 +393,6 @@ python -m llm_economist.main --wandb --scenario bounded --num-agents 20
 ```bash
 # API キーが正しく設定されていることを確認
 echo $OPENAI_API_KEY
-echo $OPENROUTER_API_KEY
-echo $GOOGLE_API_KEY
-```
-
-**ローカルモデルの接続:**
-```bash
-# vLLM サーバーが稼働中か確認
-curl http://localhost:8000/health
-
-# Ollama のステータスを確認
-ollama list
 ```
 
 **メモリの問題:**
@@ -493,13 +402,11 @@ ollama list
 
 **レート制限:**
 - API コール間に遅延を追加してください
-- 制限なしのアクセスにはローカルモデル（vLLM/Ollama）を使用してください
-- より高いレート制限のため OpenRouter に切り替えてください
+- コスト効率のため `gpt-4o-mini` の使用を検討してください
 
 **テストの失敗:**
-- クイックスタートテストには API キーが設定されていることを確認してください
-- クラウド API テストにはネットワーク接続を確認してください
-- ローカルテストにはローカルモデルサーバーが稼働中であることを確認してください
+- API キーが設定されていることを確認してください
+- ネットワーク接続を確認してください
 
 ## 📄 引用
 

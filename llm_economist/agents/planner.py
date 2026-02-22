@@ -6,8 +6,8 @@ from collections import defaultdict
 from ..utils.bracket import get_bracket_prompt, get_default_rates, get_brackets, get_num_brackets
 
 class TaxPlanner(LLMAgent):
-    def __init__(self, llm: str, port: int, name: str, prompt_algo: str= 'io', history_len: int=10, timeout: int=10, max_timesteps: int=500, num_agents: int=3, args=None) -> None:
-        super().__init__(llm, port, name, prompt_algo, history_len, timeout, args=args)
+    def __init__(self, llm: str, name: str, prompt_algo: str= 'io', history_len: int=10, timeout: int=10, max_timesteps: int=500, num_agents: int=3, args=None) -> None:
+        super().__init__(llm, name, prompt_algo, history_len, timeout, args=args)
         self.logger = logging.getLogger('main')
         self.delta = 20
         self.num_agents = num_agents
@@ -318,7 +318,7 @@ class TaxPlanner(LLMAgent):
 
 class FixedTaxPlanner(TaxPlanner):
     def __init__(self, name: str, tax_type: str='US_FED', history_len: int=10, timeout: int=10, args=None, skills: list=None) -> None:
-        super().__init__('None', port=0, name=name, history_len=history_len, timeout=timeout, args=args)
+        super().__init__('None', name=name, history_len=history_len, timeout=timeout, args=args)
 
         self.swf = 0.
         brackets = get_brackets(self.bracket_setting)

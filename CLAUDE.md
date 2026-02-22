@@ -56,11 +56,8 @@ flake8 llm_economist/
 
 ### モデル層 (`llm_economist/models/`)
 
-**BaseLLMModel** (`base.py`) を継承する各プロバイダー実装：
+**BaseLLMModel** (`base.py`) を継承するプロバイダー実装：
 - `openai_model.py`: OpenAI GPT
-- `vllm_model.py`: vLLM/Ollama（OpenAI互換エンドポイント経由）
-- `openrouter_model.py`: OpenRouter（マルチプロバイダー）
-- `gemini_model.py`: Google Gemini
 
 共通インターフェース: `send_msg(system_prompt, user_prompt, temperature, json_format) → (response, is_json)`
 
@@ -71,10 +68,8 @@ flake8 llm_economist/
 
 ## 環境変数
 
-シミュレーション実行にはLLMプロバイダーのAPIキーが必要：
+シミュレーション実行にはAPIキーが必要：
 - `OPENAI_API_KEY` または `ECON_OPENAI`: OpenAI
-- `OPENROUTER_API_KEY`: OpenRouter
-- `GOOGLE_API_KEY`: Google Gemini
 - `WANDB_API_KEY`: 実験トラッキング（オプション）
 
 ## 重要なCLI引数
@@ -88,10 +83,9 @@ flake8 llm_economist/
 | `--planner-type` | LLM / US_FED / SAEZ / UNIFORM | LLM |
 | `--prompt-algo` | io / cot | io |
 | `--bracket-setting` | flat / three / US_FED | flat |
-| `--service` | vllm / ollama（ローカルモデル用） | vllm |
 | `--use-multithreading` | Worker並列実行の有効化 | False |
 | `--wandb` | W&Bロギングの有効化 | False |
 
 ## 拡張方法
 
-新しいLLMプロバイダーを追加する場合は `BaseLLMModel` を継承し `send_msg()` を実装する。カスタムWorkerは `Worker` クラスを継承し `compute_utility()` をオーバーライドする。
+LLMモデルは OpenAI API のみ使用する。カスタムモデルを追加する場合は `BaseLLMModel` を継承し `send_msg()` を実装する。カスタムWorkerは `Worker` クラスを継承し `compute_utility()` をオーバーライドする。

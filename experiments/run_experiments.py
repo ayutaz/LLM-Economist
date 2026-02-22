@@ -41,13 +41,7 @@ def rational_agents_experiment(args):
     
     if args.wandb:
         base_cmd.append("--wandb")
-    
-    if args.port:
-        base_cmd.extend(["--port", str(args.port)])
-    
-    if args.service:
-        base_cmd.extend(["--service", args.service])
-    
+
     return run_command(base_cmd, "Rational Agents Experiment")
 
 
@@ -71,13 +65,7 @@ def bounded_rational_experiment(args):
     
     if args.wandb:
         base_cmd.append("--wandb")
-    
-    if args.port:
-        base_cmd.extend(["--port", str(args.port)])
-    
-    if args.service:
-        base_cmd.extend(["--service", args.service])
-    
+
     return run_command(base_cmd, "Bounded Rational Agents Experiment")
 
 
@@ -98,20 +86,14 @@ def democratic_voting_experiment(args):
     
     if args.wandb:
         base_cmd.append("--wandb")
-    
-    if args.port:
-        base_cmd.extend(["--port", str(args.port)])
-    
-    if args.service:
-        base_cmd.extend(["--service", args.service])
-    
+
     return run_command(base_cmd, "Democratic Voting Experiment")
 
 
 def llm_comparison_experiment(args):
     """LLM比較実験を実行する。"""
-    models = ["gpt-4o-mini", "llama3:8b", "meta-llama/llama-3.1-8b-instruct"]
-    
+    models = ["gpt-4o-mini", "gpt-4o"]
+
     for model in models:
         base_cmd = [
             sys.executable, "-m", "llm_economist.main",
@@ -125,16 +107,10 @@ def llm_comparison_experiment(args):
             "--prompt-algo", args.prompt_algo,
             "--llm", model
         ]
-        
+
         if args.wandb:
             base_cmd.append("--wandb")
-        
-        if args.port and "llama" in model:
-            base_cmd.extend(["--port", str(args.port)])
-        
-        if args.service and "llama" in model:
-            base_cmd.extend(["--service", args.service])
-        
+
         run_command(base_cmd, f"LLM Comparison - {model}")
 
 
@@ -158,13 +134,7 @@ def scalability_experiment(args):
         
         if args.wandb:
             base_cmd.append("--wandb")
-        
-        if args.port:
-            base_cmd.extend(["--port", str(args.port)])
-        
-        if args.service:
-            base_cmd.extend(["--service", args.service])
-        
+
         run_command(base_cmd, f"Scalability Test - {num_agents} agents")
 
 
@@ -192,13 +162,7 @@ def tax_year_ablation_experiment(args):
         
         if args.wandb:
             base_cmd.append("--wandb")
-        
-        if args.port:
-            base_cmd.extend(["--port", str(args.port)])
-        
-        if args.service:
-            base_cmd.extend(["--service", args.service])
-        
+
         run_command(base_cmd, f"Tax Year Ablation - {timescale} steps")
 
 
@@ -227,12 +191,6 @@ def main():
                         help="プロンプトアルゴリズム")
     parser.add_argument("--llm", type=str, default="gpt-4o-mini",
                         help="使用するLLMモデル")
-    parser.add_argument("--port", type=int, default=8000,
-                        help="ローカルLLMサーバーのポート")
-    parser.add_argument("--service", type=str, default="vllm",
-                        choices=["vllm", "ollama"],
-                        help="ローカルLLMサービス")
-
     # 限定合理性パラメータ
     parser.add_argument("--percent-ego", type=int, default=100,
                         help="利己的エージェントの割合")

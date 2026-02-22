@@ -38,7 +38,7 @@ def run_simulation(args):
     # LLM接続テスト
     if args.worker_type == 'LLM' or args.planner_type == 'LLM':
         try:
-            TestAgent(args.llm, args.port, args)
+            TestAgent(args.llm, args)
             logger.info(f"Successfully connected to LLM: {args.llm}")
         except Exception as e:
             logger.error(f"Failed to connect to LLM: {e}")
@@ -65,7 +65,7 @@ def run_simulation(args):
         utility_types = ['egotistical' for i in range(args.num_agents)]
     elif args.scenario in ('bounded', 'democratic'):
         # ペルソナの生成
-        persona_data = distribute_personas(args.num_agents, args.llm, args.port, args.service)
+        persona_data = distribute_personas(args.num_agents, args.llm)
         global GEN_ROLE_MESSAGES
         GEN_ROLE_MESSAGES.clear()
         GEN_ROLE_MESSAGES.update(persona_data)
@@ -80,9 +80,8 @@ def run_simulation(args):
     for i in range(args.num_agents):
         name = f"worker_{i}"
         if args.worker_type == 'LLM' or (args.worker_type == 'ONE_LLM' and i == 0):
-            agent = Worker(args.llm, 
-                           args.port, 
-                           name, 
+            agent = Worker(args.llm,
+                           name,
                            utility_type=utility_types[i],
                            history_len=args.history_len, 
                            prompt_algo=args.prompt_algo, 
@@ -104,7 +103,7 @@ def run_simulation(args):
         if args.num_agents > 20:
             planner_history = args.history_len//(args.num_agents) * 20
         
-        tax_planner = TaxPlanner(args.llm, args.port, 'Joe', 
+        tax_planner = TaxPlanner(args.llm, 'Joe',
                                  history_len=planner_history, prompt_algo=args.prompt_algo, 
                                  max_timesteps=args.max_timesteps, num_agents=args.num_agents, args=args)
     elif args.planner_type in ['US_FED', 'SAEZ', 'SAEZ_FLAT', 'SAEZ_THREE', 'UNIFORM']:
@@ -299,20 +298,18 @@ def create_argument_parser():
     parser.add_argument('--history-len', type=int, default=50, help='考慮する履歴の長さ')
     parser.add_argument('--two-timescale', type=int, default=25, help='2タイムスケール更新の間隔')
     parser.add_argument('--debug', type=bool, default=True, help='デバッグモードを有効化')
-    parser.add_argument('--llm', default='llama3:8b', type=str, help='使用する言語モデル')
+    parser.add_argument('--llm', default='gpt-4o-mini', type=str, help='使用する言語モデル')
     parser.add_argument('--prompt-algo', default='io', choices=['io', 'cot'], help='使用するプロンプティングアルゴリズム')
     parser.add_argument('--scenario', default='rational', choices=['rational', 'bounded', 'democratic'], help='シナリオ')
     parser.add_argument('--percent-ego', type=int, default=100)
     parser.add_argument('--percent-alt', type=int, default=0)
     parser.add_argument('--percent-adv', type=int, default=0)
-    parser.add_argument('--port', type=int, default=8009)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--agent-mix', default='us_income', choices=['uniform', 'us_income'], help='エージェントのスキルレベルの分布')
     parser.add_argument('--platforms', action="store_true", help='エージェントが選挙でプラットフォームを掲げて立候補する')
     parser.add_argument('--name', type=str, default='', help='実験名')
     parser.add_argument('--log-dir', type=str, default='logs', help='ログファイルのディレクトリ')
     parser.add_argument('--bracket-setting', default='three', choices=['flat', 'three', 'US_FED'])
-    parser.add_argument('--service', default='vllm', choices=['vllm', 'ollama'])
     parser.add_argument('--use-multithreading', action='store_true')
     parser.add_argument('--warmup', default=0, type=int)
     parser.add_argument('--elasticity', nargs='+', type=float, default=[0.4],

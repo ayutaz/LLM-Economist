@@ -5,9 +5,6 @@ import logging
 from ..utils.bracket import get_bracket_prompt
 from ..utils.common import generate_synthetic_data, GEN_ROLE_MESSAGES
 from ..models.openai_model import OpenAIModel
-from ..models.vllm_model import VLLMModel, OllamaModel
-from ..models.openrouter_model import OpenRouterModel
-from ..models.gemini_model import GeminiModel, GeminiModelViaOpenRouter
 import json
 import os
 
@@ -74,33 +71,18 @@ def distribute_fixed_personas(num_agents: int) -> list[str]:
     np.random.shuffle(personas_list)
     return personas_list
 
-def distribute_personas(num_agents: int, arg_llm: str, arg_port: int, arg_service: str) -> dict[str, str]:
+def distribute_personas(num_agents: int, arg_llm: str) -> dict[str, str]:
     """
     合成データ統計に基づいてLLMを使用してペルソナを作成する。
     各ペルソナはサンプリングされた職業、性別、年齢統計から生成される。
     """
     csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'occupation_detailed_summary.csv')
     synthetic_data = generate_synthetic_data(csv_path, num_agents)
-    
+
     if arg_llm == 'None':
         return distribute_fixed_personas(num_agents)
-    
-    # タイプに基づいて適切なLLMモデルを作成
-    if 'gpt' in arg_llm.lower():
-        llm = OpenAIModel(model_name=arg_llm)
-    elif 'claude' in arg_llm.lower() or 'anthropic' in arg_llm.lower():
-        llm = OpenRouterModel(model_name=arg_llm)
-    elif 'gemini' in arg_llm.lower():
-        llm = GeminiModel(model_name=arg_llm)
-    elif '/' in arg_llm:  # OpenRouterのモデルパスと仮定
-        llm = OpenRouterModel(model_name=arg_llm)
-    elif 'llama' in arg_llm.lower() or 'gemma' in arg_llm.lower():
-        if arg_service == 'ollama':
-            llm = OllamaModel(model_name=arg_llm, base_url=f"http://localhost:{arg_port}")
-        else:
-            llm = VLLMModel(model_name=arg_llm, base_url=f"http://localhost:{arg_port}")
-    else:
-        raise ValueError(f"無効なLLMタイプ: {arg_llm}")
+
+    llm = OpenAIModel(model_name=arg_llm)
     
     personas = {}
     
@@ -287,11 +269,11 @@ def create_persona_from_stats(occupation: str, sex: str, age: int) -> str:
 
 class Worker(LLMAgent):
     
-    def __init__(self, llm: str, port: int, name: str, two_timescale: int=20, prompt_algo: str='io', 
+    def __init__(self, llm: str, name: str, two_timescale: int=20, prompt_algo: str='io',
                  history_len: int=10, timeout: int=10, skill: int=-1, max_timesteps: int=500, role: str='default',
                    utility_type: str='egotistical', scenario: str='rational', num_agents: int=-1,
                    args=None) -> None:
-        super().__init__(llm, port, name, prompt_algo, history_len, timeout, args=args)
+        super().__init__(llm, name, prompt_algo, history_len, timeout, args=args)
         self.logger = logging.getLogger('main')
         self.max_timesteps = max_timesteps
         self.z = 0  # 税引前所得
@@ -684,7 +666,7 @@ class Worker(LLMAgent):
 
 class FixedWorker(LLMAgent):
     def __init__(self, name: str, history_len: int=10, timeout: int=10, skill: int=-1, labor: int=-1, args=None) -> None:
-        super().__init__('None', 0, name=name, history_len=history_len, timeout=timeout, args=args)
+        super().__init__('None', name=name, history_len=history_len, timeout=timeout, args=args)
         self.logger = logging.getLogger('main')
         self.z = 0  # 税引前所得
         if labor == -1:

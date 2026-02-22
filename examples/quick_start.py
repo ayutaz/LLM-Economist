@@ -95,28 +95,16 @@ def test_experiment_name_generation():
 
 
 def test_api_key_detection():
-    """各サービスのAPIキー検出をテストする。"""
+    """OpenAI APIキーの検出をテストする。"""
     print("APIキーの検出をテスト中...")
-    
-    api_keys = {
-        "OpenAI": os.getenv('OPENAI_API_KEY') or os.getenv('ECON_OPENAI'),
-        "OpenRouter": os.getenv('OPENROUTER_API_KEY'),
-        "Gemini": os.getenv('GEMINI_API_KEY'),
-    }
-    
-    found_keys = []
-    for service, key in api_keys.items():
-        if key:
-            found_keys.append(service)
-            print(f"✓ {service} APIキーが見つかりました")
-        else:
-            print(f"- {service} APIキーが見つかりません")
 
-    if found_keys:
-        print(f"✓ APIキーが見つかりました: {', '.join(found_keys)}")
+    api_key = os.getenv('OPENAI_API_KEY') or os.getenv('ECON_OPENAI')
+
+    if api_key:
+        print("✓ OpenAI APIキーが見つかりました")
         return True
     else:
-        print("- APIキーが見つかりません（テスト用途では問題ありません）")
+        print("- OpenAI APIキーが見つかりません（テスト用途では問題ありません）")
         return True
 
 
@@ -132,9 +120,6 @@ def test_basic_args_creation():
             worker_type = "LLM"
             planner_type = "LLM"
             llm = "gpt-4o-mini"
-            port = 8000
-            service = "vllm"
-            use_openrouter = False
             prompt_algo = "io"
             history_len = 20
             timeout = 10
@@ -154,12 +139,12 @@ def test_basic_args_creation():
             log_dir = "logs"
             elasticity = [0.4]
             seed = 42
-        
+
         args = Args()
-        
+
         # 全ての必須属性が存在することを検証
         required_attrs = [
-            'scenario', 'num_agents', 'max_timesteps', 'worker_type', 
+            'scenario', 'num_agents', 'max_timesteps', 'worker_type',
             'planner_type', 'llm', 'agent_mix', 'bracket_setting',
             'percent_ego', 'percent_alt', 'percent_adv', 'tax_type'
         ]
@@ -175,54 +160,44 @@ def test_basic_args_creation():
 
 
 def test_service_configurations():
-    """異なるサービス設定をテストする。"""
+    """OpenAI設定をテストする。"""
     print("サービス設定をテスト中...")
-    
-    configurations = [
-        {"service": "vllm", "port": 8000, "use_openrouter": False},
-        {"service": "ollama", "port": 11434, "use_openrouter": False},
-        {"service": "vllm", "port": 8000, "use_openrouter": True},
-    ]
-    
-    for config in configurations:
-        try:
-            class Args:
-                scenario = "rational"
-                num_agents = 3
-                max_timesteps = 5
-                worker_type = "LLM"
-                planner_type = "LLM"
-                llm = "gpt-4o-mini"
-                port = config["port"]
-                service = config["service"]
-                use_openrouter = config["use_openrouter"]
-                prompt_algo = "io"
-                history_len = 20
-                timeout = 10
-                two_timescale = 10
-                agent_mix = "us_income"
-                bracket_setting = "three"
-                percent_ego = 100
-                percent_alt = 0
-                percent_adv = 0
-                tax_type = "US_FED"
-                warmup = 0
-                wandb = False
-                debug = False
-                use_multithreading = False
-                platforms = False
-                name = ""
-                log_dir = "logs"
-                elasticity = [0.4]
-                seed = 42
-            
-            args = Args()
-            print(f"✓ 設定が有効: {config['service']} ポート {config['port']}")
-        except Exception as e:
-            print(f"✗ 設定エラー ({config}): {e}")
-            return False
 
-    print("✓ 全てのサービス設定が有効です")
+    try:
+        class Args:
+            scenario = "rational"
+            num_agents = 3
+            max_timesteps = 5
+            worker_type = "LLM"
+            planner_type = "LLM"
+            llm = "gpt-4o-mini"
+            prompt_algo = "io"
+            history_len = 20
+            timeout = 10
+            two_timescale = 10
+            agent_mix = "us_income"
+            bracket_setting = "three"
+            percent_ego = 100
+            percent_alt = 0
+            percent_adv = 0
+            tax_type = "US_FED"
+            warmup = 0
+            wandb = False
+            debug = False
+            use_multithreading = False
+            platforms = False
+            name = ""
+            log_dir = "logs"
+            elasticity = [0.4]
+            seed = 42
+
+        args = Args()
+        print("✓ OpenAI設定が有効です")
+    except Exception as e:
+        print(f"✗ 設定エラー: {e}")
+        return False
+
+    print("✓ サービス設定が有効です")
     return True
 
 

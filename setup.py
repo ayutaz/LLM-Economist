@@ -43,7 +43,6 @@ setup(
             "flake8>=4.0.0",
             "isort>=5.0.0",
         ],
-        "flash-attn": ["flash-attn>=2.0.0"],  # vLLMのパフォーマンス向上が必要な場合はコメントを解除
     },
     entry_points={
         "console_scripts": [

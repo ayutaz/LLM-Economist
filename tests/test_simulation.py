@@ -135,9 +135,6 @@ class TestSimulation:
             worker_type = "LLM"
             planner_type = "LLM"
             llm = "gpt-4o-mini"
-            port = 8000
-            service = "vllm"
-            use_openrouter = False
             prompt_algo = "io"
             history_len = 20
             timeout = 10
@@ -150,9 +147,9 @@ class TestSimulation:
             tax_type = "US_FED"
             wandb = False
             debug = False
-        
+
         args = Args()
-        
+
         # rGB2関数がスキルを返すようにモック
         with patch('llm_economist.main.rGB2', return_value=[50.0, 60.0]):
             # 例外が発生しないはず
@@ -172,12 +169,11 @@ class TestSimulation:
         """LLM接続失敗時のシミュレーション処理テスト。"""
         # テストエージェントが失敗するようにモック
         mock_test_agent.side_effect = Exception("Connection failed")
-        
+
         class Args:
             scenario = "rational"
             num_agents = 1
             llm = "gpt-4o-mini"
-            port = 8000
             debug = False
         
         args = Args()
@@ -211,9 +207,6 @@ class TestSimulation:
             worker_type = "FIXED"
             planner_type = "FIXED"
             llm = "gpt-4o-mini"
-            port = 8000
-            service = "vllm"
-            use_openrouter = False
             prompt_algo = "io"
             history_len = 20
             timeout = 10
@@ -315,9 +308,6 @@ class TestFullWorkflow:
             worker_type = "LLM"
             planner_type = "LLM"
             llm = "gpt-4o-mini"
-            port = 8000
-            service = "vllm"
-            use_openrouter = False
             prompt_algo = "io"
             history_len = 20
             timeout = 10
