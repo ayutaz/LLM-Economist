@@ -1,0 +1,45 @@
+Occupation_Label,SEX_Label,Under 18,18-24,25-34,35-44,45-54,55-64,65-74,75+
+Management occupations,Male,5,180,1200,1500,1300,900,300,50
+Management occupations,Female,3,120,900,1100,1000,700,200,30
+Business and financial operations,Male,2,150,600,550,450,350,100,15
+Business and financial operations,Female,2,180,700,600,500,380,110,18
+Computer and mathematical occupations,Male,3,200,800,700,500,300,80,10
+Computer and mathematical occupations,Female,1,80,300,250,180,120,30,5
+Architecture and engineering,Male,1,100,400,350,300,250,80,12
+Architecture and engineering,Female,0,30,120,100,70,50,15,2
+"Life, physical, and social science",Male,1,60,150,130,100,80,30,8
+"Life, physical, and social science",Female,1,70,160,140,110,85,25,5
+Community and social service,Male,1,50,150,130,100,80,25,5
+Community and social service,Female,1,80,250,220,180,140,45,8
+Legal occupations,Male,0,20,150,180,160,120,50,15
+Legal occupations,Female,0,25,160,170,140,100,35,8
+Educational instruction and library,Male,2,100,350,300,250,200,70,15
+Educational instruction and library,Female,3,200,700,650,550,450,150,25
+"Arts, design, entertainment, sports, and media",Male,5,120,300,250,180,120,40,8
+"Arts, design, entertainment, sports, and media",Female,3,100,250,220,160,100,35,6
+Healthcare practitioners and technical,Male,1,80,400,350,280,200,70,15
+Healthcare practitioners and technical,Female,2,200,800,750,600,450,150,25
+Healthcare support occupations,Male,2,80,150,120,100,70,20,3
+Healthcare support occupations,Female,5,200,400,350,300,220,70,10
+Protective service occupations,Male,2,100,350,300,250,150,40,5
+Protective service occupations,Female,1,30,100,80,60,40,10,2
+Food preparation and serving,Male,50,500,400,250,150,80,25,5
+Food preparation and serving,Female,40,450,350,250,150,80,25,5
+Building and grounds cleaning and maintenance,Male,5,150,400,350,300,250,100,20
+Building and grounds cleaning and maintenance,Female,3,80,200,200,180,150,60,10
+Personal care and service,Male,5,80,150,120,100,70,25,5
+Personal care and service,Female,8,150,300,280,250,180,60,10
+Sales and related occupations,Male,30,400,600,500,400,300,120,25
+Sales and related occupations,Female,25,350,500,450,380,280,100,20
+Office and administrative support,Male,5,200,400,350,300,250,80,15
+Office and administrative support,Female,10,400,800,700,600,500,170,25
+"Farming, fishing, and forestry",Male,10,80,150,130,100,80,30,8
+"Farming, fishing, and forestry",Female,3,20,40,35,25,20,8,2
+Construction and extraction,Male,10,350,900,800,600,400,100,15
+Construction and extraction,Female,1,15,40,35,25,15,5,1
+"Installation, maintenance, and repair",Male,5,200,500,450,380,280,80,12
+"Installation, maintenance, and repair",Female,0,10,25,20,15,10,3,1
+Production occupations,Male,8,250,500,450,380,280,80,12
+Production occupations,Female,3,100,200,180,150,120,35,5
+Transportation and material moving,Male,10,300,700,650,550,400,120,18
+Transportation and material moving,Female,2,60,150,140,120,90,25,4
